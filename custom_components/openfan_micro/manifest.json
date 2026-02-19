@@ -1,12 +1,13 @@
 {
   "domain": "openfan_micro",
   "name": "OpenFAN Micro",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "config_flow": true,
   "documentation": "https://github.com/bitlisz1/hass-openfan-micro",
   "issue_tracker": "https://github.com/bitlisz1/hass-openfan-micro/issues",
   "codeowners": ["@bitlisz1"],
   "iot_class": "local_polling",
+  "platforms": ["fan", "sensor", "binary_sensor"]
   "loggers": ["custom_components.openfan_micro"],
   "requirements": []
 }
