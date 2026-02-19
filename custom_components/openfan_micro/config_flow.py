@@ -28,7 +28,7 @@ async def _validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str
 
     dev = OpenFanDevice(hass, host, name)
     # First refresh will fetch status once (raises on network error).
-    await dev.async_first_refresh()
+   # await dev.async_first_refresh()
     rpm = dev.coordinator_data.get("rpm", 0)
 
     return {"title": name, "host": host, "name": name, "rpm": rpm}
