@@ -1,6 +1,7 @@
 """Coordinator with availability gating, LED/12V state, and stall detection."""
 from __future__ import annotations
 import logging
+import time
 from datetime import timedelta
 
 from homeassistant.core import HomeAssistant
@@ -16,44 +17,54 @@ class OpenFanCoordinator(DataUpdateCoordinator[dict]):
 
     def __init__(self, hass: HomeAssistant, api: OpenFanApi) -> None:
         interval = int(getattr(api, "_poll_interval", 5) or 5)
+
         super().__init__(
             hass,
             _LOGGER,
             name="OpenFAN Micro",
             update_interval=timedelta(seconds=interval),
         )
+
         self.api = api
+
+        # --- existing fields ---
         self._consecutive_failures = 0
         self._forced_unavailable = False
         self._consecutive_stall = 0
         self._notified_stall = False
         self._last_error: str | None = None
 
+        # --- 🆕 SMART POLLING ---
+        self._fast_interval = 5
+        self._slow_interval = 30
+        self._last_active = time.monotonic()
+
     async def _async_update_data(self) -> dict:
         try:
             rpm, pwm = await self.api.get_status()
+
             # clear failure gating
             self._consecutive_failures = 0
             self._forced_unavailable = False
             self._last_error = None
 
-            # LED / 12V (tűrjük, ha a fw még nem tudja)
+            # LED / 12V
             led, is_12v = False, False
             try:
                 led, is_12v = await self.api.get_openfan_status()
             except Exception as sub_err:
                 _LOGGER.debug("OpenFAN Micro: openfan/status fetch failed: %r", sub_err)
 
-            # Stall: ha PWM > min és RPM=0 több cikluson át
+            # --- Stall detection ---
             min_pwm = int(getattr(self.api, "_min_pwm", 0) or 0)
             need = int(getattr(self.api, "_stall_consecutive", 3) or 3)
+
             stalled_now = (int(pwm) > max(0, min_pwm)) and int(rpm) == 0
             self._consecutive_stall = (self._consecutive_stall + 1) if stalled_now else 0
             stalled_flag = self._consecutive_stall >= need
 
             if stalled_flag and not self._notified_stall:
                 self._notified_stall = True
-                # esemény + értesítés (nem végzetes, csak jelzés)
                 try:
                     self.hass.bus.async_fire(
                         "openfan_micro_stall", {"host": getattr(self.api, "_host", "?")}
@@ -63,8 +74,9 @@ class OpenFanCoordinator(DataUpdateCoordinator[dict]):
                         title="OpenFAN Micro",
                         notification_id=f"openfan_micro_stall_{getattr(self.api,'_host','?')}",
                     )
-                except Exception:  # not fatal
+                except Exception:
                     pass
+
             if not stalled_flag:
                 self._notified_stall = False
 
@@ -75,14 +87,33 @@ class OpenFanCoordinator(DataUpdateCoordinator[dict]):
                 "is_12v": bool(is_12v),
                 "stalled": stalled_flag,
             }
+
+            # --- 🆕 SMART POLLING LOGIC ---
+            now = time.monotonic()
+
+            if pwm > 0 or (now - self._last_active) < 60:
+                new_interval = self._fast_interval
+            else:
+                new_interval = self._slow_interval
+
+            if self.update_interval.total_seconds() != new_interval:
+                _LOGGER.debug(
+                    "OpenFAN polling interval changed: %ss → %ss",
+                    self.update_interval.total_seconds(),
+                    new_interval,
+                )
+                self.update_interval = timedelta(seconds=new_interval)
+
             _LOGGER.debug("OpenFAN Micro update OK (%s): %s", getattr(self.api, "_host", "?"), data)
             return data
 
         except Exception as err:
             self._last_error = str(err)
             self._consecutive_failures += 1
+
             fail_thresh = int(getattr(self.api, "_failure_threshold", 3) or 3)
             if self._consecutive_failures >= fail_thresh:
                 self._forced_unavailable = True
+
             _LOGGER.error("OpenFAN Micro update failed (%s): %r", getattr(self.api, "_host", "?"), err)
             raise UpdateFailed(f"Failed to update OpenFAN Micro: {err}") from err
