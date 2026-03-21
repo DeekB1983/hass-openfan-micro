@@ -2,6 +2,7 @@
 from __future__ import annotations
 from typing import Any
 import logging
+import time  # 🆕 added
 
 from homeassistant.components.fan import FanEntity, FanEntityFeature
 from homeassistant.config_entries import ConfigEntry
@@ -58,18 +59,29 @@ class OpenFan(CoordinatorEntity, FanEntity):
     async def async_set_percentage(self, percentage: int) -> None:
         opts = self._entry.options or {}
         min_pwm = int(opts.get("min_pwm", 0))
+
         if int(percentage) > 0:
             percentage = max(min_pwm, int(percentage))
+
         await self._device.api.set_pwm(int(percentage))
+
+        # 🆕 mark as active → triggers fast polling
+        self._device.coordinator._last_active = time.monotonic()
+
         await self.coordinator.async_request_refresh()
 
     async def async_turn_on(self, percentage: int | None = None, **kwargs) -> None:
         if percentage is None:
             percentage = max(1, self._entry.options.get("min_pwm", 0) or 1)
+
         await self.async_set_percentage(int(percentage))
 
     async def async_turn_off(self, **kwargs) -> None:
         await self._device.api.set_pwm(0)
+
+        # 🆕 mark as active → triggers fast polling
+        self._device.coordinator._last_active = time.monotonic()
+
         await self.coordinator.async_request_refresh()
 
     # ---- attributes ----
