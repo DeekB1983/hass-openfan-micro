@@ -1,265 +1,319 @@
 # OpenFAN Micro — Home Assistant Integration
 
-Note: AI used for generate code, at least I tested few days with 2 controller+fans.
+Custom integration for **OpenFAN Micro** devices, providing fan control, monitoring, and advanced automation with a focus on **stability, low resource usage, and responsiveness**.
 
-> **Status:**  `v1.0.0`
-> “Graduated from v0.3.1-beta.3; stability & docs polish.”
-> Custom integration for [OpenFAN Micro](https://github.com/SasaKaranovic/OpenFan-Micro) devices.  
-> Adds LED and 5V/12V switches, stall detection, diagnostics, and **temperature-based fan control** with smoothing and **calibration-gated minimum PWM**.
+> ⚠️ Note: This integration has been significantly optimised to prevent device instability caused by excessive API polling.
 
----
+## 📦 Installation
 
-## Features
+### Option A — HACS (Recommended)
 
-- **Fan control**: on/off and percentage (0–100%)
-- **RPM sensor** (`sensor.<name>_rpm`) with long-term statistics
-- **LED switch** (`switch.<name>_led`) — activity LED on/off
-- **12V mode switch** (`switch.<name>_12v_mode`) — on=12V, off=5V
-- **Availability gating** — marks device `unavailable` only after N consecutive failures
-- **Stall detection** — binary sensor + persistent notification + HA event
-- **Diagnostics export** — from the integration card
-- **Temperature-based control** (piecewise-linear curve) with:
-  - moving-average **integration window**
-  - **minimum interval** between speed changes
-  - **deadband** to avoid flapping
-  - **clamped by calibrated minimum PWM** (never drives below min, except when fully off)
+1. HACS → Integrations → ⋮ Custom repositories
+2. Add Repsository: **Category** "Integration"
+   ```
+   https://github.com/DeekB1983/hass-openfan-micro
+   ```
+4. Find → Download **OpenFAN Micro** from HAC's
+5. (Optional) Click “Need a different version?” and select v1.0.2_Test (Pre_Release of V1.0.3)
+6. Restart Home Assistant
+7. Settings → Devices & Services → Add Integration → OpenFAN Micro, then enter the device IP and a friendly name
+   (Where xxx.xxx.xxx.xxx denotes the IP address + Fan Name, repeat per device if you have multiple)
+   ![brave_U922ETczsN](https://github.com/user-attachments/assets/ebacea07-2ce1-4f85-bee3-3d0889486b4e)
 
 ---
-
-## Requirements
-
-- OpenFAN Micro firmware providing:
-  - Fan status & set: `/api/v0/fan/status`, `/api/v0/fan/0/status`, `/api/v0/fan/0/set?value=…` (legacy `/api/v0/fan/set?value=…` also supported)
-  - Device status: `/api/v0/openfan/status` (fields: `act_led_enabled`, `fan_is_12v`)
-  - LED & voltage: `/api/v0/led/(enable|disable)`, `/api/v0/fan/voltage/(high|low)?confirm=true`
-- Home Assistant **2024.12 or newer** (tested on 2025.x)
-
----
-
-## Installation
-
-### Option A — HACS (Custom Repository)
-
-1. **HACS → Integrations →** ⋮ **Custom repositories**
-2. Add: `https://github.com/bitlisz1/hass-openfan-micro` (Category: **Integration**)
-3. Find **OpenFAN Micro** → **Download**
-4. (Optional) Click **“Need a different version?”** and select **`v0.3.1-beta.3`** (pre-release)
-5. **Restart Home Assistant**
-6. **Settings → Devices & Services → Add Integration → OpenFAN Micro**, then enter the device IP and a friendly name  
-   (repeat per device if you have multiple)
 
 ### Option B — Manual
-
-1. Copy this folder to your HA config:  
-   `custom_components/openfan_micro/`
-2. **Restart Home Assistant**
-3. Add the integration: **Settings → Devices & Services → Add Integration → OpenFAN Micro**
-
-> **Note:** If the **Options** button doesn’t show up on the integration card (frontend cache), all advanced settings can be configured via **Developer Tools → Actions** services (see below).
-
----
-
-## Entities created (per device)
-
-- `fan.<name>` — main fan entity (percentage + on/off)
-- `sensor.<name>_rpm` — RPM (unit: `rpm`, `state_class: measurement`)
-- `switch.<name>_led` — activity LED on/off
-- `switch.<name>_12v_mode` — 12V mode on/off (on=12V, off=5V)
-- `binary_sensor.<name>_stall` — **on** when stall is detected
-
-### Extra attributes on the fan entity
-
-The `fan.<name>` entity exposes:
-
-- `min_pwm`, `min_pwm_calibrated`
-- `temp_control_active`
-- `temp_entity`, `temp_curve`
-- `temp_avg` (moving-average), `last_target_pwm`, `last_applied_pwm`
-- `temp_update_min_interval`, `temp_deadband_pct`
-
-Use a **Markdown** Lovelace card to display these attributes if you like (examples below).
+1. Download the code.
+2. Extract the ZIP.
+3. Copy the files to:
+```
+/config/custom_components/openfan_micro/
+```
+4. Restart Home Assistant
+5. Add the integration: Settings → Devices & Services → Add Integration → OpenFAN Micro
 
 ---
 
-## First run: Calibrate the minimum PWM (required for temp control)
+## 🚀 Current Status
 
-Run once per device to find the minimum PWM that reliably spins the fan.
+**Version:** v1.0.3 (Stable Release)
+**Home Assistant:** 2023.03.+ compatible
 
-**Developer Tools → Actions →**
+This release focuses on:
 
-`openfan_micro.calibrate_min`:
+* Device stability
+* Reduced API load
+* Reliable real-time control
 
-yaml
+---
 
+## ⚠️ Background (Why these changes were made)
+
+Earlier versions of this integration used **aggressive polling (~5s constantly)** which resulted in:
+
+* OpenFAN Micro web UI becoming unresponsive
+* Device dropping off the network
+* High API load (~32,000+ requests/day)
+* Required manual reboot to recover
+* Potential port exhuastion
+* Potential memory exhuastion
+
+### Root cause:
+
+> Excessive API calls and inefficient HTTP connection handling overwhelmed the microcontroller.
+
+---
+
+## 📉 Key Improvement: Smart Polling
+
+### Before:
+
+* Polling every 5 seconds continuously
+* Multiple endpoints per cycle
+* ~32,000+ API calls/day
+
+### After:
+
+* Default polling: **30 seconds**
+* Fast polling: **5 seconds (only after user interaction)**
+* Secondary data polled less frequently
+
+### Result:
+
+* ~3,300 API calls/day (idle)
+* ~4,000–4,500 API calls/day (typical use)
+
+✅ ~85–90% reduction in API load  
+✅ Device remains stable long-term  
+✅ Web UI stays responsive  
+
+---
+
+## ⚡ Features
+
+### Core
+
+* Fan control (0–100%)
+* RPM sensor (`sensor.<name>_rpm`)
+* Fan on/off control
+* Fast response after changes (~0–5s)
+
+### Device Controls
+
+* LED switch (`switch.<name>_led`)
+* 12V / 5V mode switch (`switch.<name>_12v_mode`)
+
+### Reliability
+
+* Availability gating (failure threshold)
+* Stall detection:
+
+  * Binary sensor
+  * Home Assistant event
+  * Persistent notification
+
+### Advanced Control
+
+* Temperature-based fan control:
+
+  * Piecewise curve (°C → PWM)
+  * Moving average smoothing
+  * Deadband to prevent oscillation
+  * Minimum PWM enforcement (via calibration)
+
+### Diagnostics
+
+* Built-in diagnostics export
+* Debug logging with timestamps
+
+---
+
+## 🌐 API Requirements
+
+Your OpenFAN Micro firmware must support:  
+
+### Required
+
+* `GET /api/v0/fan/status` → `{ rpm, pwm_percent }`
+* `POST /api/v0/fan/set?value=XX` (or equivalent working endpoint)
+
+### Optional
+
+* `GET /api/v0/openfan/status`
+
+  * `act_led_enabled`
+  * `fan_is_12v`
+
+* LED:
+
+  * `/api/v0/led/enable`
+  * `/api/v0/led/disable`
+
+* Voltage:
+
+  * `/api/v0/fan/voltage/high` (for 12v)
+  * `/api/v0/fan/voltage/low` (for 5v)
+
+  
+Tested on OpenFAN Micro Firmware: v20240319
+ 
+---
+
+## 🧠 Smart Polling Behaviour
+
+| Scenario          | Poll Interval                 |
+| ----------------- | ----------------------------- |
+| Idle              | 30 seconds                    |
+| After HA control  | 5 seconds (≈15 seconds total) |
+| LED / 12V refresh | Every ~3 minutes              |
+
+### Behaviour:
+
+1. User changes fan speed via the Home Assistant Integration
+2. Immediate refresh triggered
+3. Fast polling (5s × 3 cycles)
+4. Automatically returns to 30s polling
+5. Polling stays at 30 seconds if fan speed is changed via the MicroFan controller Web interface (Expected)
+
+---
+
+## 🌐 HTTP Optimisations
+
+To prevent device overload:
+
+* Disabled HTTP keep-alive
+* Added delay between API requests
+* Reduced duplicate calls
+* Centralised polling via coordinator
+* Split high-frequency vs low-frequency data
+
+---
+
+## 🔌 Entities
+
+Per device:
+
+* `fan.<name>`
+* `sensor.<name>_rpm`
+* `switch.<name>_led`
+* `switch.<name>_12v_mode`
+* `binary_sensor.<name>_stall`
+
+---
+
+## 🔧 First Run: Calibrate Minimum PWM
+
+Required for proper operation.
+
+Run:
+
+```yaml
 action: openfan_micro.calibrate_min
 data:
-  entity_id: fan.your_fan_entity
+  entity_id: fan.your_fan
   from_pct: 5
   to_pct: 40
   step: 2
   rpm_threshold: 120
   margin: 5
-The routine increases PWM until RPM >= rpm_threshold, then stores min_pwm = found + margin
+```
 
-Sets min_pwm_calibrated = true
+---
 
-Tip: Re-calibrate after switching 5V/12V
+## 🌡️ Temperature Control
 
-Temperature-based control
-You can configure it through Options (if visible) or via Actions services (always available).
+Enable:
 
-A) Configure via Options
-
-Integrations → OpenFAN Micro → Options:
-
-temp_entity: temperature sensor entity (e.g. sensor.rt_ax92u_temperature_cpu)
-temp_curve: curve points in °C=PWM% pairs, comma-separated, e.g.
-
-45=35, 60=60, 70=100
-
-temp_integrate_seconds: moving-average window (e.g. 30–90)
-temp_update_min_interval: minimum seconds between changes (e.g. 10–30)
-temp_deadband_pct: change threshold in % to avoid tiny adjustments (e.g. 3–5)
-
-The controller activates only if the entry is calibrated and has a valid temp_entity and curve.
-
-B) Configure via Actions (services)
-Enable / update:
-
-yaml
-
+```yaml
 action: openfan_micro.set_temp_control
 data:
-  entity_id: fan.your_fan_entity
-  temp_entity: sensor.any_temperature
+  entity_id: fan.your_fan
+  temp_entity: sensor.temperature
   temp_curve: "45=35, 60=60, 70=100"
-  temp_integrate_seconds: 30
-  temp_update_min_interval: 10
-  temp_deadband_pct: 3
+```
+
 Disable:
 
-yaml
-
+```yaml
 action: openfan_micro.clear_temp_control
-data:
-  entity_id: fan.your_fan_entity
+```
 
-Recommended curves (45–75 °C)
-Quiet: 45=25, 60=55, 75=100
+---
 
-Balanced (default): 45=35, 60=60, 70=100
+## 📊 Diagnostics
 
-Aggressive: 45=40, 55=70, 65=100
+Download via:
+Settings → Devices & Services → OpenFAN Micro → Download diagnostics
 
-The controller never drives below min_pwm (except when target is 0%, which turns the fan off).
+Includes:
 
-LED & Voltage services (optional)
+* Current state
+* Coordinator data
+* Control logic state
 
-yaml
+---
 
-# LED on/off
-action: openfan_micro.led_set
-data:
-  entity_id: fan.your_fan_entity
-  enabled: true
+## 🛠️ Debug Logging
 
-# 12V / 5V (UI offers "5"/"12" strings; service accepts numbers too)
-action: openfan_micro.set_voltage
-data:
-  entity_id: fan.your_fan_entity
-  volts: "12"   # or "5"
-Stall detection
-The binary sensor turns on if PWM > min_pwm and RPM == 0 for N consecutive polls
-(stall_consecutive option; default 3). When detected, the integration also emits:
-
-Event: openfan_micro_stall (payload includes host)
-
-Persistent notification in HA
-
-Diagnostics
-Settings → Devices & Services → Integrations → OpenFAN Micro → ⋮ Download diagnostics
-The bundle includes:
-
-Config entry options
-
-Last coordinator data (rpm, pwm, LED, 12V, stall)
-
-Controller state (temp average, last target/applied PWM, gating flags)
-
-If you open an issue, attaching diagnostics and a debug log helps a lot.
-
-Troubleshooting
-Options button missing: Use the Actions services; refresh the browser (Ctrl+F5) or restart HA to reveal Options later.
-
-Fan sticks near minimum: Confirm min_pwm_calibrated: true. Check temp_avg, last_target_pwm, last_applied_pwm. Consider reducing temp_deadband_pct, lowering temp_update_min_interval, or raising curve points.
-
-LED/12V toggles jump back: Ensure your firmware provides /api/v0/openfan/status; this integration reads act_led_enabled / fan_is_12v from there.
-
-“No long-term statistics” warning: The RPM sensor sets state_class: measurement. If you saw earlier warnings, you can safely delete the old statistics record when prompted.
-
-Multiple devices: All services accept entity_id to target the correct device; options are stored on the owner config entry.
-
-Enable debug logging
-yaml
-
+```yaml
 logger:
-  default: info
   logs:
     custom_components.openfan_micro: debug
+```
 
-Lovelace examples
-Entities + attributes (Markdown)
+---
 
-yaml
+## 🔗 Device Web Interface
 
-type: vertical-stack
-cards:
-  - type: entities
-    title: UOpenFan Up
-    entities:
-      - entity: fan.uopenfanup
-        name: Fan
-      - entity: sensor.uopenfanup_rpm
-        name: RPM
-      - entity: switch.uopenfan_up_led
-        name: LED
-      - entity: switch.uopenfan_up_12v_mode
-        name: 12V Mode
-  - type: markdown
-    content: |
-      **Control state**
-      - Calibrated min: **{{ state_attr('fan.uopenfanup','min_pwm') }}%** (calibrated: {{ state_attr('fan.uopenfanup','min_pwm_calibrated') }})
-      - Temp control active: **{{ state_attr('fan.uopenfanup','temp_control_active') }}**
-      - Temp entity: `{{ state_attr('fan.uopenfanup','temp_entity') }}`
-      - Temp average: **{{ (state_attr('fan.uopenfanup','temp_avg') or 0) | round(1) }}°C**
-      - Target PWM: **{{ state_attr('fan.uopenfanup','last_target_pwm') }}%**
-      - Applied PWM: **{{ state_attr('fan.uopenfanup','last_applied_pwm') }}%**
+A **“Visit Device”** button is available in Home Assistant, linking directly to the device’s web UI.
 
-Gauge (RPM)
-yaml
+---
 
-type: gauge
-entity: sensor.uopenfanup_rpm
-min: 0
-max: 2500
-name: UOpenFan Up RPM
-(Repeat the stack for the “Down” fan with the corresponding entity ids.)
+## 🧪 Troubleshooting
 
+### Device becomes unresponsive
 
-Contributing
-Issues and PRs are welcome. When reporting bugs, please attach:
+* Fixed in v1.0.3 via reduced polling
+* Ensure you are running latest version
 
-Diagnostics export (see above)
+### Fan RPM updates are slow
 
-Debug logs
+* Expected:
 
-Credits
+  * 5s after control
+  * 30s otherwise
 
-OpenFAN Micro hardware & firmware: Sasa Karanovic
+### PWM stuck low
 
-Original HA integration: BeryJu
+* Ensure calibration completed
+* Check `min_pwm_calibrated`
 
-This fork: enhancements for LED/12V, stall detection, diagnostics, and temperature-based control with smoothing
+---
 
-License
-See LICENSE in this repository. The integration may include code adapted from the original project; original licenses apply.
+## 🤝 Contributing
+
+Issues and PRs welcome.
+
+Please include:
+
+* Diagnostics export
+* Debug logs
+
+---
+
+## 🙏 Credits
+
+* OpenFAN Micro hardware & firmware: **Sasa Karanovic**
+* Original integration: **BeryJu, bitlisz1**
+* This fork:
+
+  * Stability improvements
+  * Smart polling system
+  * API optimisation
+  * Enhanced diagnostics
+
+---
+
+## 📄 License
+
+See LICENSE file in repository.
