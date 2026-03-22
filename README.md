@@ -132,7 +132,6 @@ Earlier versions of this integration used **aggressive polling (~5s constantly)*
 ## 🌐 API Requirements
 
 Your OpenFAN Micro firmware must support:  
-Tested on OpenFAN Micro Firmware: v20240319
 
 ### Required
 
@@ -155,7 +154,8 @@ Tested on OpenFAN Micro Firmware: v20240319
 
   * `/api/v0/fan/voltage/high` (for 12v)
   * `/api/v0/fan/voltage/low` (for 5v)
-
+ 
+Tested on OpenFAN Micro Firmware: v20240319
 ---
 
 ## 🧠 Smart Polling Behaviour
