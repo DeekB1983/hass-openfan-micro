@@ -20,8 +20,6 @@ Custom integration for **OpenFAN Micro** devices, providing fan control, monitor
    (Where xxx.xxx.xxx.xxx denotes the IP address + Fan Name, repeat per device if you have multiple)
    ![brave_U922ETczsN](https://github.com/user-attachments/assets/ebacea07-2ce1-4f85-bee3-3d0889486b4e)
 
-> ⚠️ To test this version, ensure you are using the correct branch or commit.
-
 ---
 
 ### Option B — Manual
@@ -38,7 +36,7 @@ Custom integration for **OpenFAN Micro** devices, providing fan control, monitor
 
 ## 🚀 Current Status
 
-**Version:** v1.0.2_test (Bug-Fixes / Improvements branch)
+**Version:** v1.0.3 (Stable Release)
 **Home Assistant:** 2023.03.+ compatible
 
 This release focuses on:
@@ -275,7 +273,7 @@ A **“Visit Device”** button is available in Home Assistant, linking directly
 
 ### Device becomes unresponsive
 
-* Fixed in v1.0.2 via reduced polling
+* Fixed in v1.0.3 via reduced polling
 * Ensure you are running latest version
 
 ### Fan RPM updates are slow
