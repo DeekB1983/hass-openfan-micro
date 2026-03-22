@@ -19,7 +19,7 @@ Custom integration for **OpenFAN Micro** devices, providing fan control, monitor
 7. Settings → Devices & Services → Add Integration → OpenFAN Micro  
    Then enter the device IP and a friendly name  
    (Where xxx.xxx.xxx.xxx denotes the IP address + Fan Name)  
-   Repeat per device if you have multiple
+   Repeat per device if you have multiple devices\fan controllers
    ![brave_U922ETczsN](https://github.com/user-attachments/assets/ebacea07-2ce1-4f85-bee3-3d0889486b4e)
 
 ---
