@@ -9,12 +9,11 @@ Custom integration for **OpenFAN Micro** devices, providing fan control, monitor
 ### Option A — HACS (Recommended)
 
 1. HACS → Integrations → ⋮ Custom repositories
-2. Add Repsository:
+2. Add Repsository: **Category** "Integration"
    ```
    https://github.com/DeekB1983/hass-openfan-micro
    ```
-3. Type = "Integration"
-4. Install **OpenFAN Micro**
+4. Find & Download **OpenFAN Micro** from HAC's
 5. Restart Home Assistant
 6. Add integration via UI in the following format:
    (Where xxx.xxx.xxx.xxx denotes the IP address + Fan Name)
