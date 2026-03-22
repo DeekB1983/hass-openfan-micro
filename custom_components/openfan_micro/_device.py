@@ -80,6 +80,8 @@ class OpenFanDevice:
             "manufacturer": self._fixed_data.get("manufacturer", "Karanovic Research"),
             "model": self._fixed_data.get("model", "OpenFAN Micro"),
             "name": self._fixed_data.get("name", self.name),
+            # Add clickable link to the device web UI
+            "configuration_url": f"http://{self.host}/",
         }
         m = self.mac
         if m:
@@ -96,6 +98,7 @@ class OpenFanDevice:
 
     def __repr__(self) -> str:  # pragma: no cover
         return f"<OpenFanDevice host={self.host} name={self.name!r} mac={self.mac!r}>"
+
 
 # Backwards-compatible alias (original code imported `Device`)
 Device = OpenFanDevice
