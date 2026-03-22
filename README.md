@@ -58,7 +58,7 @@ Earlier versions of this integration used **aggressive polling (~5s constantly)*
 * High API load (~32,000+ requests/day)
 * Required manual reboot to recover
 * Potential port exhuastion
-* potential memory exhuastion
+* Potential memory exhuastion
 
 ### Root cause:
 
