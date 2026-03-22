@@ -153,8 +153,8 @@ Tested on OpenFAN Micro Firmware: v20240319
 
 * Voltage:
 
-  * `/api/v0/fan/voltage/high`
-  * `/api/v0/fan/voltage/low`
+  * `/api/v0/fan/voltage/high` (for 12v)
+  * `/api/v0/fan/voltage/low` (for 5v)
 
 ---
 
