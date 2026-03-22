@@ -25,10 +25,9 @@ Custom integration for **OpenFAN Micro** devices, providing fan control, monitor
 ---
 
 ### Option B — Manual
-Download the code.
-Extract the ZIP.
+Download the code.  
+Extract the ZIP.  
 Copy the files to:
-
 ```
 /config/custom_components/openfan_micro/
 ```
@@ -85,9 +84,9 @@ Earlier versions of this integration used **aggressive polling (~5s constantly)*
 * ~3,300 API calls/day (idle)
 * ~4,000–4,500 API calls/day (typical use)
 
-✅ ~85–90% reduction in API load
-✅ Device remains stable long-term
-✅ Web UI stays responsive
+✅ ~85–90% reduction in API load  
+✅ Device remains stable long-term  
+✅ Web UI stays responsive  
 
 ---
 
