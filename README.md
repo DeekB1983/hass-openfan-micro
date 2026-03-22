@@ -12,11 +12,13 @@ Custom integration for **OpenFAN Micro** devices, providing fan control, monitor
 2. Add:
 
    ```
-   https://github.com/bitlisz1/hass-openfan-micro
+   https://github.com/DeekB1983/hass-openfan-micro
    ```
 3. Install **OpenFAN Micro**
 4. Restart Home Assistant
-5. Add integration via UI
+5. Add integration via UI in the following format:
+   (Where xxx.xxx.xxx.xxx denotes the IP address + Fan Name)
+   ![brave_U922ETczsN](https://github.com/user-attachments/assets/ebacea07-2ce1-4f85-bee3-3d0889486b4e)
 
 > ⚠️ To test this version, ensure you are using the correct branch or commit.
 
