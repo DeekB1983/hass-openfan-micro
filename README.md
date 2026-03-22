@@ -154,8 +154,9 @@ Your OpenFAN Micro firmware must support:
 
   * `/api/v0/fan/voltage/high` (for 12v)
   * `/api/v0/fan/voltage/low` (for 5v)
- 
+  
 Tested on OpenFAN Micro Firmware: v20240319
+ 
 ---
 
 ## 🧠 Smart Polling Behaviour
