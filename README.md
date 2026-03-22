@@ -25,16 +25,14 @@ Custom integration for **OpenFAN Micro** devices, providing fan control, monitor
 ---
 
 ### Option B — Manual
-
-Copy to:
+Download the code.
+Extract the ZIP.
+Copy the files to:
 
 ```
 /config/custom_components/openfan_micro/
 ```
-
 Restart Home Assistant, then add via UI.
-
----
 
 ---
 
