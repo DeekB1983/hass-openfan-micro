@@ -131,7 +131,8 @@ Earlier versions of this integration used **aggressive polling (~5s constantly)*
 
 ## 🌐 API Requirements
 
-Your OpenFAN Micro firmware must support:
+Your OpenFAN Micro firmware must support:  
+Tested on OpenFAN Micro Firmware: v20240319
 
 ### Required
 
