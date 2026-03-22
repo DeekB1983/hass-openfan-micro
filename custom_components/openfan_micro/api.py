@@ -30,25 +30,26 @@ class OpenFanApi:
 
     # -------------------- HTTP helpers --------------------
 
-    async def _get_any(self, path: str) -> tuple[int, str, Optional[dict]]:
-        """HTTP GET that returns (status_code, text, json_or_none).
+async def _get_any(self, path: str) -> tuple[int, str, Optional[dict]]:
+    url = f"http://{self._host}{path}"
 
-        We *do not* fail if body is not JSON (some firmwares reply plain 'OK').
-        """
-        url = f"http://{self._host}{path}"
-        async with async_timeout.timeout(6):
-            async with self._session.get(url) as resp:
-                status = resp.status
-                text = await resp.text()
-                data = None
-                try:
-                    data = await resp.json(content_type=None)
-                except Exception:
-                    # not JSON (acceptable for 'set' endpoints)
-                    pass
-        _LOGGER.debug("OpenFAN %s GET %s -> %s %s", self._host, path, status, data or text)
-        return status, text, data
+    await asyncio.sleep(0.05)  # 🆕 small delay
 
+    async with async_timeout.timeout(6):
+        async with self._session.get(
+            url,
+            headers={"Connection": "close"}  # 🆕 disable keep-alive
+        ) as resp:
+            status = resp.status
+            text = await resp.text()
+            data = None
+            try:
+                data = await resp.json(content_type=None)
+            except Exception:
+                pass
+
+    return status, text, data
+    
     async def _get_json(self, path: str) -> dict:
         """HTTP GET that *requires* JSON. Raises on HTTP error or non-JSON."""
         status, text, data = await self._get_any(path)
