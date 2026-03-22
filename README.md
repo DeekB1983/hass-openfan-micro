@@ -167,10 +167,11 @@ Your OpenFAN Micro firmware must support:
 
 ### Behaviour:
 
-1. User changes fan speed
+1. User changes fan speed via the Home Assistant Integration
 2. Immediate refresh triggered
 3. Fast polling (5s × 3 cycles)
 4. Automatically returns to 30s polling
+5. Polling stays at 30 seconds if fan speed is changed via the MicroFan controller Web interface (Expected)
 
 ---
 
