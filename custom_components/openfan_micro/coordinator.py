@@ -34,8 +34,8 @@ class OpenFanCoordinator(DataUpdateCoordinator[dict]):
         self._notified_stall = False
 
         # --- smart polling ---
-        self._fast_interval = 5
-        self._slow_interval = 30
+        self._fast_interval = 2
+        self._slow_interval = 60
 
         # number of fast cycles after a change (IMPORTANT)
         self._fast_cycles_remaining = 0
