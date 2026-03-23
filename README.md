@@ -38,7 +38,7 @@ Custom integration for **OpenFAN Micro** devices, providing fan control, monitor
 
 ## 🚀 Current Status
 
-**Version:** v1.0.3 (Stable Release)
+**Version:** v1.0.4 (Beta Release)
 **Home Assistant:** 2023.03.+ compatible
 
 This release focuses on:
@@ -76,16 +76,16 @@ Earlier versions of this integration used **aggressive polling (~5s constantly)*
 
 ### After:
 
-* Default polling: **30 seconds**
-* Fast polling: **5 seconds (only after user interaction)**
+* Default polling: **60 seconds**
+* Fast polling: **2 seconds (only after user interaction)**
 * Secondary data polled less frequently
 
 ### Result:
 
-* ~3,300 API calls/day (idle)
-* ~4,000–4,500 API calls/day (typical use)
+* ~1,650 API calls/day (idle)
+* ~1,750–2,000 API calls/day (typical use if manually adjusting the fan via Home Assistant)
 
-✅ ~85–90% reduction in API load  
+✅ ~93.75%+ reduction in API load  
 ✅ Device remains stable long-term  
 ✅ Web UI stays responsive  
 
@@ -165,17 +165,17 @@ Tested on OpenFAN Micro Firmware: v20240319
 
 | Scenario          | Poll Interval                 |
 | ----------------- | ----------------------------- |
-| Idle              | 30 seconds                    |
-| After HA control  | 5 seconds (≈15 seconds total) |
-| LED / 12V refresh | Every ~3 minutes              |
+| Idle              | 60 seconds                    |
+| After HA control  | 2 seconds (≈6 seconds total) |
+| LED / 12V refresh | Every ~6 minutes              |
 
 ### Behaviour:
 
 1. User changes fan speed via the Home Assistant Integration
-2. Immediate refresh triggered
-3. Fast polling (5s × 3 cycles)
-4. Automatically returns to 30s polling
-5. Polling stays at 30 seconds if fan speed is changed via the MicroFan controller Web interface (Expected)
+2. Immediate refresh triggered via Fast Polling
+3. Fast polling (2s × 3 cycles)
+4. Automatically returns to 60s polling after 3 fast polling cycles if no more PWM fan changes via HA are completed
+5. Polling stays at 60 seconds if fan speed is changed via the MicroFan controller Web interface (Expected)
 
 ---
 
@@ -282,8 +282,8 @@ A **“Visit Device”** button is available in Home Assistant, linking directly
 
 * Expected:
 
-  * 5s after control
-  * 30s otherwise
+  * 2s after control
+  * 60s otherwise
 
 ### PWM stuck low
 
