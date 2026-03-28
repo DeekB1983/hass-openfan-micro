@@ -1,3 +1,29 @@
+"""Fan entity for OpenFAN Micro with min-PWM clamp, fast-polling, and debug attributes."""
+from __future__ import annotations
+from typing import Any
+import logging
+
+from homeassistant.components.fan import FanEntity, FanEntityFeature
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
+
+_LOGGER = logging.getLogger(__name__)
+
+
+async def async_setup_entry(
+    hass: HomeAssistant,
+    entry: ConfigEntry,
+    async_add: AddEntitiesCallback,
+) -> None:
+    """Set up fan entity from config entry."""
+    device = getattr(entry, "runtime_data", None)
+    if device is None:
+        _LOGGER.error("OpenFAN Micro: runtime_data is None (fan)")
+        return
+    async_add([OpenFan(device, entry)])
+
 class OpenFan(CoordinatorEntity, FanEntity):
     """Fan entity for OpenFAN Micro."""
 
