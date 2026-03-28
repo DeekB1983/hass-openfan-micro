@@ -64,7 +64,7 @@ class OpenFan(CoordinatorEntity, FanEntity):
 
     # ---- control ----
 
-    async def async_set_percentage(self, percentage: int) -> None:
+    async def async_set_percentage(self, percentage: int, **kwargs) -> None:
         """Set fan PWM and request fast poll."""
         opts = self._entry.options or {}
         min_pwm = int(opts.get("min_pwm", 0))
@@ -84,7 +84,12 @@ class OpenFan(CoordinatorEntity, FanEntity):
         if hasattr(self.coordinator, "force_fast_poll"):
             self.coordinator.force_fast_poll()
 
-    async def async_turn_on(self, percentage: int | None = None, **kwargs) -> None:
+        async def async_turn_on(
+            self,
+            percentage: int | None = None,
+            preset_mode: str | None = None,
+            **kwargs,
+        ) -> None:
         if percentage is None:
             percentage = max(1, self._entry.options.get("min_pwm", 0) or 1)
         await self.async_set_percentage(int(percentage))
