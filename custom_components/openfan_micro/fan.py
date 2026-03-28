@@ -29,9 +29,11 @@ class OpenFan(CoordinatorEntity, FanEntity):
     """Fan entity for OpenFAN Micro."""
 
     _attr_supported_features = (
-        FanEntityFeature.SET_SPEED | FanEntityFeature.TURN_ON | FanEntityFeature.TURN_OFF
+        FanEntityFeature.SET_PERCENTAGE
+        | FanEntityFeature.TURN_ON
+        | FanEntityFeature.TURN_OFF
     )
-
+    
     def __init__(self, device, entry: ConfigEntry) -> None:
         super().__init__(device.coordinator)
         self._device = device
