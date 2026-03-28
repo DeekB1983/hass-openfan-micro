@@ -91,8 +91,10 @@ class OpenFan(CoordinatorEntity, FanEntity):
             **kwargs,
         ) -> None:
             if percentage is None:
-            percentage = max(1, self._entry.options.get("min_pwm", 0) or 1)
-        await self.async_set_percentage(int(percentage))
+                percentage = max(
+                    1, self._entry.options.get("min_pwm", 0) or 1
+                )
+            await self.async_set_percentage(int(percentage))
 
     async def async_turn_off(self, **kwargs) -> None:
         await self._device.api.set_pwm(0)
