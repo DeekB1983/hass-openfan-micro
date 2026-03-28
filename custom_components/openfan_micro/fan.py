@@ -90,7 +90,7 @@ class OpenFan(CoordinatorEntity, FanEntity):
             preset_mode: str | None = None,
             **kwargs,
         ) -> None:
-        if percentage is None:
+            if percentage is None:
             percentage = max(1, self._entry.options.get("min_pwm", 0) or 1)
         await self.async_set_percentage(int(percentage))
 
