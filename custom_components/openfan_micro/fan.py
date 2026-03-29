@@ -113,10 +113,10 @@ class OpenFan(CoordinatorEntity, FanEntity):
         await self.async_set_percentage(int(percentage))
 
     async def async_turn_off(self, **kwargs) -> None:
-        """Turn the fan off."""
+        """Turn the fan off without resetting last speed."""
         try:
             await self._device.api.set_pwm(0)
-            # Store 0 as last_speed temporarily? Keep memory intact
+            # Do NOT modify self._last_speed here
         except Exception as exc:
             _LOGGER.error("OpenFAN Micro: Failed to turn off fan: %s", exc)
             raise
