@@ -179,7 +179,7 @@ Tested on OpenFAN Micro Firmware: v20240319
 
 ---
 
-## Fan Behavior: Before vs After ⚙️🌀
+## ⚙️🌀 Fan Behavior: Before vs After 
 
 | Feature | Before | After |
 |---------|--------|-------|
