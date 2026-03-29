@@ -36,11 +36,12 @@ Custom integration for **OpenFAN Micro** devices, providing fan control, monitor
 
 ---
 ## 🔧 First Run: Calibrate Minimum PWM
-
-Required for proper operation.
+Run once per device to find the minimum PWM that your fan can reliably spin at.
+When executed this will sweep the PWM values for your fan and detect minimum value that your fan can reliably spin at.
+Once Complete it stores result in options as min_pwm and marks the fan as calibrated.
+This can be achieved by going to "Developer Tools → Actions → openfan_micro.calibrate_min"
 
 Run:
-
 ```yaml
 action: openfan_micro.calibrate_min
 data:
@@ -55,7 +56,7 @@ data:
 
 ## 🌡️ Temperature Control
 
-The temperature control for the fan is software based and can be achieved by adding the following lines to your configuration.yaml file.
+The temperature control for the fan is software based and can be achieved by going to "Developer Tools → Actions → openfan_micro.set_temp_control"
 
 Enable:
 ```yaml
@@ -68,9 +69,11 @@ data:
 The temperature curve can be adjusted as requiured, based on above example:
 (Temp=FanSpeed)
  * 30 degrees celcius = 40% PWM Value
- * 40 degrees celcius = 60% PWM Value
+ * 40 degrees celcius = 50% PWM Value
  * 55 degrees celcius = 100% PWM Value
- 
+Example Screenshot:
+ ![brave_gDeR4aVy42](https://github.com/user-attachments/assets/40420226-fd37-4e71-bc7b-11ee2b961b6c)
+
 Disable:
 ```yaml
 action: openfan_micro.clear_temp_control
