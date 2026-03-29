@@ -35,6 +35,47 @@ Custom integration for **OpenFAN Micro** devices, providing fan control, monitor
 5. Add the integration: Settings → Devices & Services → Add Integration → OpenFAN Micro
 
 ---
+## 🔧 First Run: Calibrate Minimum PWM
+
+Required for proper operation.
+
+Run:
+
+```yaml
+action: openfan_micro.calibrate_min
+data:
+  entity_id: fan.your_fan
+  from_pct: 5
+  to_pct: 40
+  step: 2
+  rpm_threshold: 120
+  margin: 5
+```
+---
+
+## 🌡️ Temperature Control
+
+The temperature control for the fan is software based and can be achieved by adding the following lines to your configuration.yaml file.
+
+Enable:
+```yaml
+action: openfan_micro.set_temp_control
+data:
+  entity_id: fan.your_fan
+  temp_entity: sensor.temperature
+  temp_curve: "30=40, 40=60, 55=100"
+```
+The temperature curve can be adjusted as requiured, based on above example:
+(Temp=FanSpeed)
+ * 30 degrees celcius = 40% PWM Value
+ * 40 degrees celcius = 60% PWM Value
+ * 55 degrees celcius = 100% PWM Value
+ 
+Disable:
+```yaml
+action: openfan_micro.clear_temp_control
+```
+---
 ## 🚀 Current Status
 **Version:** v1.0.4 (Stable Release)
 **Home Assistant:** 2026.03.+ compatible (Earlier versions may work but all testing has been completed on 2026.03.+)
@@ -186,48 +227,6 @@ Per device:
 * `binary_sensor.<name>_stall`
 
 ---
-## 🔧 First Run: Calibrate Minimum PWM
-
-Required for proper operation.
-
-Run:
-
-```yaml
-action: openfan_micro.calibrate_min
-data:
-  entity_id: fan.your_fan
-  from_pct: 5
-  to_pct: 40
-  step: 2
-  rpm_threshold: 120
-  margin: 5
-```
----
-
-## 🌡️ Temperature Control
-
-The temperature control for the fan is software based and can be achieved by adding the following lines to your configuration.yaml file.
-
-Enable:
-```yaml
-action: openfan_micro.set_temp_control
-data:
-  entity_id: fan.your_fan
-  temp_entity: sensor.temperature
-  temp_curve: "30=40, 40=60, 55=100"
-```
-The temperature curve can be adjusted as requiured, based on above example:
-(Temp=FanSpeed)
- * 30 degrees celcius = 40% PWM Value
- * 40 degrees celcius = 60% PWM Value
- * 55 degrees celcius = 100% PWM Value
- 
-Disable:
-```yaml
-action: openfan_micro.clear_temp_control
-```
----
-
 # 🏠🌀 Lovelace Usage 
 
 The fan entity works seamlessly with Home Assistant Lovelace controls.
