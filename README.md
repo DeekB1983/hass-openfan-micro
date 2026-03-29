@@ -38,8 +38,8 @@ Custom integration for **OpenFAN Micro** devices, providing fan control, monitor
 
 ## 🚀 Current Status
 
-**Version:** v1.0.4 (Beta Release)
-**Home Assistant:** 2023.03.+ compatible
+**Version:** v1.0.4 (Stable Release)
+**Home Assistant:** 2026.03.+ compatible
 
 This release focuses on:
 
@@ -69,85 +69,67 @@ Earlier versions of this integration used **aggressive polling (~5s constantly)*
 ## 📉 Key Improvement: Smart Polling
 
 ### Before:
-
 * Polling every 5 seconds continuously
 * Multiple endpoints per cycle
 * ~32,000+ API calls/day
 
 ### After:
-
 * Default polling: **60 seconds**
 * Fast polling: **2 seconds (only after user interaction)**
 * Secondary data polled less frequently
-
-### Result:
-
-* ~1,650 API calls/day (idle)
+* * ~1,650 API calls/day (idle)
 * ~1,750–2,000 API calls/day (typical use if manually adjusting the fan via Home Assistant)
 
+### Result:
 ✅ ~93.75%+ reduction in API load  
 ✅ Device remains stable long-term  
 ✅ Web UI stays responsive  
 
 ---
-
 ## ⚡ Features
 
 ### Core
-
 * Fan control (0–100%)
 * RPM sensor (`sensor.<name>_rpm`)
 * Fan on/off control
 * Fast response after changes (~0–5s)
 
 ### Device Controls
-
 * LED switch (`switch.<name>_led`)
 * 12V / 5V mode switch (`switch.<name>_12v_mode`)
 
 ### Reliability
-
 * Availability gating (failure threshold)
 * Stall detection:
-
   * Binary sensor
   * Home Assistant event
   * Persistent notification
 
 ### Advanced Control
-
 * Temperature-based fan control:
-
   * Piecewise curve (°C → PWM)
   * Moving average smoothing
   * Deadband to prevent oscillation
   * Minimum PWM enforcement (via calibration)
 
 ### Diagnostics
-
 * Built-in diagnostics export
 * Debug logging with timestamps
 
 ---
-
 ## 🌐 API Requirements
 
 Your OpenFAN Micro firmware must support:  
-
 ### Required
-
 * `GET /api/v0/fan/status` → `{ rpm, pwm_percent }`
 * `POST /api/v0/fan/set?value=XX` (or equivalent working endpoint)
 
 ### Optional
-
 * `GET /api/v0/openfan/status`
-
   * `act_led_enabled`
   * `fan_is_12v`
 
 * LED:
-
   * `/api/v0/led/enable`
   * `/api/v0/led/disable`
 
@@ -155,12 +137,10 @@ Your OpenFAN Micro firmware must support:
 
   * `/api/v0/fan/voltage/high` (for 12v)
   * `/api/v0/fan/voltage/low` (for 5v)
-
   
 Tested on OpenFAN Micro Firmware: v20240319
- 
----
 
+---
 ## 🧠 Smart Polling Behaviour
 
 | Scenario          | Poll Interval                 |
@@ -178,8 +158,7 @@ Tested on OpenFAN Micro Firmware: v20240319
 5. Polling stays at 60 seconds if fan speed is changed via the MicroFan controller Web interface (Expected)
 
 ---
-
-## ⚙️🌀 Fan Behavior: Before vs After 
+## ⚙️🌀 Fan Behavior: Before vs After (V1.0.4)
 
 | Feature | Before | After |
 |---------|--------|-------|
@@ -194,9 +173,7 @@ Tested on OpenFAN Micro Firmware: v20240319
 > ⚠️ Note: The default startup speed of 50% applies only on the **first power-on**. After that, the fan remembers the last user-set speed automatically.
 
 ---
-
 ## 🌐 HTTP Optimisations
-
 To prevent device overload:
 
 * Disabled HTTP keep-alive
@@ -206,9 +183,7 @@ To prevent device overload:
 * Split high-frequency vs low-frequency data
 
 ---
-
 ## 🔌 Entities
-
 Per device:
 
 * `fan.<name>`
@@ -218,7 +193,6 @@ Per device:
 * `binary_sensor.<name>_stall`
 
 ---
-
 ## 🔧 First Run: Calibrate Minimum PWM
 
 Required for proper operation.
@@ -235,23 +209,27 @@ data:
   rpm_threshold: 120
   margin: 5
 ```
-
 ---
 
 ## 🌡️ Temperature Control
 
-Enable:
+The temperature control for the fan is software based and can be achieved by adding the following lines to your configuration.yaml file.
 
+Enable:
 ```yaml
 action: openfan_micro.set_temp_control
 data:
   entity_id: fan.your_fan
   temp_entity: sensor.temperature
-  temp_curve: "45=35, 60=60, 70=100"
+  temp_curve: "30=40, 40=60, 55=100"
 ```
-
+The temperature curve can be adjusted as requiured, based on above example:
+(Temp=FanSpeed)
+ * 30 degrees celcius = 40% PWN Value
+ * 40 degrees celcius = 60% PWN Value
+ * 55 degrees celcius = 100% PWN Value
+ 
 Disable:
-
 ```yaml
 action: openfan_micro.clear_temp_control
 ```
@@ -305,20 +283,16 @@ hours_to_show: 24
 ```
 
 ---
-
 ## 📊 Diagnostics
 
 Download via:
 Settings → Devices & Services → OpenFAN Micro → Download diagnostics
-
 Includes:
-
 * Current state
 * Coordinator data
 * Control logic state
 
 ---
-
 ## 🛠️ Debug Logging
 
 ```yaml
@@ -328,58 +302,43 @@ logger:
 ```
 
 ---
-
 ## 🔗 Device Web Interface
-
 A **“Visit Device”** button is available in Home Assistant, linking directly to the device’s web UI.
 
 ---
-
 ## 🧪 Troubleshooting
 
 ### Device becomes unresponsive
-
 * Fixed in v1.0.3 via reduced polling
 * Ensure you are running latest version
 
 ### Fan RPM updates are slow
-
 * Expected:
-
   * 2s after control
   * 60s otherwise
 
 ### PWM stuck low
-
 * Ensure calibration completed
 * Check `min_pwm_calibrated`
 
 ---
-
 ## 🤝 Contributing
-
 Issues and PRs welcome.
-
 Please include:
-
 * Diagnostics export
 * Debug logs
 
 ---
-
 ## 🙏 Credits
-
 * OpenFAN Micro hardware & firmware: **Sasa Karanovic**
 * Original integration: **BeryJu, bitlisz1**
-* This fork:
-
+* This fork includes:
   * Stability improvements
   * Smart polling system
   * API optimisation
   * Enhanced diagnostics
 
 ---
-
 ## 📄 License
 
 See LICENSE file in repository.
