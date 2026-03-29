@@ -2,8 +2,6 @@
 
 Custom integration for **OpenFAN Micro** devices, providing fan control, monitoring, and advanced automation with a focus on **stability, low resource usage, and responsiveness**.
 
-> ⚠️ Note: This integration has been significantly optimised to prevent device instability caused by excessive API polling.
-
 ## 📦 Installation
 
 ### Option A — HACS (Recommended)
@@ -92,6 +90,9 @@ This release focuses on:
 
 ---
 ## ⚠️ Background (Why these changes were made)
+
+> ⚠️ Note: This integration has been significantly optimised to prevent device instability caused by excessive API polling.
+
 Earlier versions of this integration used **aggressive polling (~5s constantly)** which resulted in:
 
 * OpenFAN Micro web UI becoming unresponsive
