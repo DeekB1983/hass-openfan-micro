@@ -1,7 +1,7 @@
 {
   "domain": "openfan_micro",
   "name": "OpenFAN Micro",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "config_flow": true,
   "documentation": "https://github.com/DeekB1983/hass-openfan-micro",
   "issue_tracker": "https://github.com/DeekB1983/hass-openfan-micro/issues",
