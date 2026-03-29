@@ -58,6 +58,7 @@ This release focuses on:
 | **Home Assistant Slider** | Moving slider after off/on reset to 1% | Slider reflects **current or last speed**, consistent after off/on |
 | **Automations** | Automations turning fan on had to explicitly set speed | Automations can turn fan on **without specifying speed**; last speed used automatically |
 | **Debug / Attributes** | Limited visibility of last PWM | `last_speed` added to `extra_state_attributes` for easier monitoring |
+| **Positional Argument Bug** | `async_turn_on()` failed with “takes 1 to 2 positional arguments but 3 were given” | Fixed method signature to match Home Assistant expectations |
 | **User Experience** | Inconsistent, fan always “starts slow” | Smooth, predictable fan behavior ⚡🌀 |
 
 > ⚠️ Note: The default startup speed of 50% applies only on the **first power-on**. After that, the fan remembers the last user-set speed automatically.
