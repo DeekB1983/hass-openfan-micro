@@ -215,7 +215,7 @@ Tested on OpenFAN Micro Firmware: v20240319
 > ⚠️ Note: The default startup speed of 50% applies only on the **first power-on**. After that, the fan remembers the last user-set speed automatically.
 
 ---
-## 🌐 HTTP Optimisations
+## 🌐 HTTP Optimisations (v1.0.3)
 To prevent device overload:
 
 * Disabled HTTP keep-alive
