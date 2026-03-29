@@ -14,7 +14,7 @@ Custom integration for **OpenFAN Micro** devices, providing fan control, monitor
    https://github.com/DeekB1983/hass-openfan-micro
    ```
 4. Find → Download **OpenFAN Micro** from HAC's
-5. (Optional) Click “Need a different version?” and select v1.0.2_Test (Pre_Release of V1.0.3)
+5. (Optional) Click “Need a different version?” and select v1.0.3 \ v1.0.4 (Currently v1.0.4 is the latest\default version)
 6. Restart Home Assistant
 7. Settings → Devices & Services → Add Integration → OpenFAN Micro  
    Then enter the device IP and a friendly name  
@@ -35,22 +35,17 @@ Custom integration for **OpenFAN Micro** devices, providing fan control, monitor
 5. Add the integration: Settings → Devices & Services → Add Integration → OpenFAN Micro
 
 ---
-
 ## 🚀 Current Status
-
 **Version:** v1.0.4 (Stable Release)
-**Home Assistant:** 2026.03.+ compatible
+**Home Assistant:** 2026.03.+ compatible (Earlier versions may work but all testing has been completed on 2026.03.+)
 
 This release focuses on:
-
 * Device stability
 * Reduced API load
 * Reliable real-time control
 
 ---
-
 ## ⚠️ Background (Why these changes were made)
-
 Earlier versions of this integration used **aggressive polling (~5s constantly)** which resulted in:
 
 * OpenFAN Micro web UI becoming unresponsive
@@ -61,11 +56,9 @@ Earlier versions of this integration used **aggressive polling (~5s constantly)*
 * Potential memory exhuastion
 
 ### Root cause:
-
 > Excessive API calls and inefficient HTTP connection handling overwhelmed the microcontroller.
 
 ---
-
 ## 📉 Key Improvement: Smart Polling
 
 ### Before:
@@ -225,9 +218,9 @@ data:
 ```
 The temperature curve can be adjusted as requiured, based on above example:
 (Temp=FanSpeed)
- * 30 degrees celcius = 40% PWN Value
- * 40 degrees celcius = 60% PWN Value
- * 55 degrees celcius = 100% PWN Value
+ * 30 degrees celcius = 40% PWM Value
+ * 40 degrees celcius = 60% PWM Value
+ * 55 degrees celcius = 100% PWM Value
  
 Disable:
 ```yaml
