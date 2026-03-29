@@ -72,6 +72,7 @@ The temperature curve can be adjusted as requiured, based on above example:
  * 30 degrees celcius = 40% PWM Value
  * 40 degrees celcius = 50% PWM Value
  * 55 degrees celcius = 100% PWM Value
+   
 Example Screenshot:
  ![brave_gDeR4aVy42](https://github.com/user-attachments/assets/40420226-fd37-4e71-bc7b-11ee2b961b6c)
 
