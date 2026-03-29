@@ -195,6 +195,20 @@ Tested on OpenFAN Micro Firmware: v20240319
 
 ---
 
+# 🏠🌀 Lovelace Usage 
+
+The fan entity works seamlessly with Home Assistant Lovelace controls.
+
+### Example: Fan Control Card
+
+```yaml
+type: tile
+entity: fan.openfan_micro
+features:
+  - type: fan-speed
+
+---
+
 ## 🌐 HTTP Optimisations
 
 To prevent device overload:
