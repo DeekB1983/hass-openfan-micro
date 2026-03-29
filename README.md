@@ -195,39 +195,6 @@ Tested on OpenFAN Micro Firmware: v20240319
 
 ---
 
-# 🏠🌀 Lovelace Usage 
-
-The fan entity works seamlessly with Home Assistant Lovelace controls.
-
-### Example: Fan Control Card
-
-```yaml
-type: tile
-entity: fan.openfan_micro
-features:
-  - type: fan-speed
-```
-
-Example: Slider Card
-```yaml
-type: entities
-entities:
-  - entity: fan.openfan_micro
-    name: Fan-Name
-```
-
-Example: Horizontal Fan Control
-```yaml
-type: horizontal-stack
-cards:
-  - type: tile
-    entity: fan.openfan_micro
-    features:
-      - type: fan-speed
-```
-
----
-
 ## 🌐 HTTP Optimisations
 
 To prevent device overload:
@@ -288,7 +255,55 @@ Disable:
 ```yaml
 action: openfan_micro.clear_temp_control
 ```
+---
 
+# 🏠🌀 Lovelace Usage 
+
+The fan entity works seamlessly with Home Assistant Lovelace controls.
+
+### Example: Fan Control Card
+
+```yaml
+type: tile
+entity: fan.openfan_micro
+features:
+  - type: fan-speed
+```
+
+Example: Slider Card
+```yaml
+type: entities
+entities:
+  - entity: fan.openfan_micro
+    name: Fan-Name
+```
+
+Example: Horizontal Fan Control
+```yaml
+type: horizontal-stack
+cards:
+  - type: tile
+    entity: fan.openfan_micro
+    features:
+      - type: fan-speed
+```
+
+Example: RPM Display Card
+```yaml
+type: gauge
+entity: sensor.openfan_micro_fan_rpm
+name: Fan RPM
+min: 0
+max: 5000
+```
+
+Example: RPM Graph
+```yaml
+type: history-graph
+entities:
+  - sensor.openfan_micro_fan_rpm
+hours_to_show: 24
+```
 ---
 
 ## 📊 Diagnostics
