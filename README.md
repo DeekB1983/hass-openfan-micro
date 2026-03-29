@@ -261,8 +261,7 @@ action: openfan_micro.clear_temp_control
 
 The fan entity works seamlessly with Home Assistant Lovelace controls.
 
-### Example: Fan Control Card
-
+## Example: Fan Control Card
 ```yaml
 type: tile
 entity: fan.openfan_micro
@@ -270,7 +269,7 @@ features:
   - type: fan-speed
 ```
 
-Example: Slider Card
+## Example: Slider Card
 ```yaml
 type: entities
 entities:
@@ -278,7 +277,7 @@ entities:
     name: Fan-Name
 ```
 
-Example: Horizontal Fan Control
+## Example: Horizontal Fan Control
 ```yaml
 type: horizontal-stack
 cards:
@@ -288,7 +287,7 @@ cards:
       - type: fan-speed
 ```
 
-Example: RPM Display Card
+## Example: RPM Display Card
 ```yaml
 type: gauge
 entity: sensor.openfan_micro_fan_rpm
@@ -297,13 +296,14 @@ min: 0
 max: 5000
 ```
 
-Example: RPM Graph
+## Example: RPM Graph
 ```yaml
 type: history-graph
 entities:
   - sensor.openfan_micro_fan_rpm
 hours_to_show: 24
 ```
+
 ---
 
 ## 📊 Diagnostics
