@@ -49,22 +49,6 @@ This release focuses on:
 
 ---
 
-## Fan Behavior: Before vs After ⚙️🌀
-
-| Feature | Before | After |
-|---------|--------|-------|
-| **Power On Speed** | Fan always started at 1% when turned on | Fan starts at **last user-set speed**, or **50% by default** if first time |
-| **Turning Off** | Speed reset to 1% | Speed **retained**; next turn-on resumes last speed |
-| **Home Assistant Slider** | Moving slider after off/on reset to 1% | Slider reflects **current or last speed**, consistent after off/on |
-| **Automations** | Automations turning fan on had to explicitly set speed | Automations can turn fan on **without specifying speed**; last speed used automatically |
-| **Debug / Attributes** | Limited visibility of last PWM | `last_speed` added to `extra_state_attributes` for easier monitoring |
-| **Positional Argument Bug** | `async_turn_on()` failed with “takes 1 to 2 positional arguments but 3 were given” | Fixed method signature to match Home Assistant expectations |
-| **User Experience** | Inconsistent, fan always “starts slow” | Smooth, predictable fan behavior ⚡🌀 |
-
-> ⚠️ Note: The default startup speed of 50% applies only on the **first power-on**. After that, the fan remembers the last user-set speed automatically.
-
----
-
 ## ⚠️ Background (Why these changes were made)
 
 Earlier versions of this integration used **aggressive polling (~5s constantly)** which resulted in:
@@ -192,6 +176,22 @@ Tested on OpenFAN Micro Firmware: v20240319
 3. Fast polling (2s × 3 cycles)
 4. Automatically returns to 60s polling after 3 fast polling cycles if no more PWM fan changes via HA are completed
 5. Polling stays at 60 seconds if fan speed is changed via the MicroFan controller Web interface (Expected)
+
+---
+
+## Fan Behavior: Before vs After ⚙️🌀
+
+| Feature | Before | After |
+|---------|--------|-------|
+| **Power On Speed** | Fan always started at 1% when turned on | Fan starts at **last user-set speed**, or **50% by default** if first time |
+| **Turning Off** | Speed reset to 1% | Speed **retained**; next turn-on resumes last speed |
+| **Home Assistant Slider** | Moving slider after off/on reset to 1% | Slider reflects **current or last speed**, consistent after off/on |
+| **Automations** | Automations turning fan on had to explicitly set speed | Automations can turn fan on **without specifying speed**; last speed used automatically |
+| **Debug / Attributes** | Limited visibility of last PWM | `last_speed` added to `extra_state_attributes` for easier monitoring |
+| **Positional Argument Bug** | `async_turn_on()` failed with “takes 1 to 2 positional arguments but 3 were given” | Fixed method signature to match Home Assistant expectations |
+| **User Experience** | Inconsistent, fan always “starts slow” | Smooth, predictable fan behavior ⚡🌀 |
+
+> ⚠️ Note: The default startup speed of 50% applies only on the **first power-on**. After that, the fan remembers the last user-set speed automatically.
 
 ---
 
