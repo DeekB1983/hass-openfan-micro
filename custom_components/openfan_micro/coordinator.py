@@ -34,8 +34,8 @@ class OpenFanCoordinator(DataUpdateCoordinator[dict]):
         self._notified_stall = False
 
         # --- smart polling ---
-        self._fast_interval = 5
-        self._slow_interval = 30
+        self._fast_interval = 2
+        self._slow_interval = 60
 
         # number of fast cycles after a change (IMPORTANT)
         self._fast_cycles_remaining = 0
@@ -49,7 +49,7 @@ class OpenFanCoordinator(DataUpdateCoordinator[dict]):
 
     def force_fast_poll(self) -> None:
         """Trigger immediate refresh + short burst of fast polling."""
-        self._fast_cycles_remaining = 3  # ← 3 cycles = ~15 seconds responsiveness
+        self._fast_cycles_remaining = 3  # ← 3 cycles = ~6 seconds responsiveness
         self.update_interval = timedelta(seconds=self._fast_interval)
 
         _LOGGER.debug(
