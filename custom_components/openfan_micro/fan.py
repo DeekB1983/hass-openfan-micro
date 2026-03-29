@@ -1,4 +1,4 @@
-"""Fan entity for OpenFAN Micro with min-PWM clamp, fast-polling, and last-speed memory."""
+"""Fan entity for OpenFAN Micro with min-PWM clamp, last-speed memory, fast-polling, and debug attributes."""
 from __future__ import annotations
 from typing import Any
 import logging
@@ -31,7 +31,7 @@ class OpenFan(CoordinatorEntity, FanEntity):
     _attr_supported_features = (
         FanEntityFeature.TURN_ON
         | FanEntityFeature.TURN_OFF
-        | FanEntityFeature.SET_PERCENTAGE
+        | FanEntityFeature.SET_SPEED  # Backwards-compatible
     )
 
     def __init__(self, device, entry: ConfigEntry) -> None:
@@ -41,33 +41,29 @@ class OpenFan(CoordinatorEntity, FanEntity):
         self._host = getattr(device, "host", "unknown")
         self._attr_name = getattr(device, "name", "OpenFAN Micro")
         self._attr_unique_id = f"openfan_micro_fan_{self._host}"
-        self._last_percentage: int | None = None  # Track last non-zero speed
+        self._last_speed: int | None = None  # Remember last speed
+
+    @property
+    def device_info(self) -> dict[str, Any] | None:
+        return self._device.device_info()
+
+    @property
+    def available(self) -> bool:
+        base = super().available
+        forced = getattr(self.coordinator, "_forced_unavailable", False)
+        return base and not forced
 
     # ---- state ----
 
     @property
     def percentage(self) -> int | None:
-        """Current PWM percentage."""
         data = self.coordinator.data or {}
         return int(data.get("pwm")) if "pwm" in data else None
 
     @property
     def is_on(self) -> bool | None:
-        """Return True if fan is on."""
         p = self.percentage
         return None if p is None else (p > 0)
-
-    @property
-    def available(self) -> bool:
-        """Return availability."""
-        base = super().available
-        forced = getattr(self.coordinator, "_forced_unavailable", False)
-        return base and not forced
-
-    @property
-    def device_info(self) -> dict[str, Any] | None:
-        """Device info for HA."""
-        return self._device.device_info()
 
     # ---- control ----
 
@@ -75,13 +71,17 @@ class OpenFan(CoordinatorEntity, FanEntity):
         """Set fan PWM and request fast poll."""
         opts = self._entry.options or {}
         min_pwm = int(opts.get("min_pwm", 0))
-        if percentage > 0:
-            percentage = max(min_pwm, percentage)
-            self._last_percentage = percentage  # Remember last non-zero speed
+        if int(percentage) > 0:
+            percentage = max(min_pwm, int(percentage))
 
         try:
             await self._device.api.set_pwm(int(percentage))
-            _LOGGER.debug("OpenFAN Micro: PWM set to %s%% for host %s", percentage, self._host)
+            _LOGGER.debug(
+                "OpenFAN Micro: PWM set to %s%% for host %s", percentage, self._host
+            )
+            # Remember last speed when above 0%
+            if percentage > 0:
+                self._last_speed = percentage
         except Exception as exc:
             _LOGGER.error("OpenFAN Micro: Failed to set PWM: %s", exc)
             raise
@@ -91,17 +91,24 @@ class OpenFan(CoordinatorEntity, FanEntity):
             self.coordinator.force_fast_poll()
 
     async def async_turn_on(self, percentage: int | None = None, **kwargs) -> None:
-        """Turn the fan on."""
+        """Turn fan on. If no percentage is provided, use last speed or min_pwm."""
+        opts = self._entry.options or {}
+        min_pwm = int(opts.get("min_pwm", 0)) or 1
         if percentage is None:
-            # Use last non-zero percentage if available, otherwise min PWM
-            percentage = self._last_percentage or max(1, self._entry.options.get("min_pwm", 0) or 1)
+            # Use last speed if available, otherwise min_pwm
+            percentage = self._last_speed or min_pwm
         await self.async_set_percentage(int(percentage))
 
     async def async_turn_off(self, **kwargs) -> None:
-        """Turn the fan off."""
-        await self._device.api.set_pwm(0)
-        if hasattr(self.coordinator, "force_fast_poll"):
-            self.coordinator.force_fast_poll()
+        """Turn fan off (0% PWM)."""
+        try:
+            await self._device.api.set_pwm(0)
+            # Keep _last_speed so turning on resumes previous speed
+            if hasattr(self.coordinator, "force_fast_poll"):
+                self.coordinator.force_fast_poll()
+        except Exception as exc:
+            _LOGGER.error("OpenFAN Micro: Failed to turn off fan: %s", exc)
+            raise
 
     # ---- attributes ----
 
@@ -122,5 +129,5 @@ class OpenFan(CoordinatorEntity, FanEntity):
                 ctrl.get("temp_update_min_interval", opts.get("temp_update_min_interval", 10))
             ),
             "temp_deadband_pct": int(ctrl.get("temp_deadband_pct", opts.get("temp_deadband_pct", 3))),
-            "last_percentage": self._last_percentage,  # Expose for Lovelace/automations
+            "last_speed": self._last_speed,
         }
