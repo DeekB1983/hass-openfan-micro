@@ -1,4 +1,4 @@
-"""Fan entity for OpenFAN Micro with min-PWM clamp, last-speed memory, fast-polling, and debug attributes."""
+"""Fan entity for OpenFAN Micro with min-PWM clamp, last speed memory, and fast-polling."""
 from __future__ import annotations
 from typing import Any
 import logging
@@ -31,7 +31,7 @@ class OpenFan(CoordinatorEntity, FanEntity):
     _attr_supported_features = (
         FanEntityFeature.TURN_ON
         | FanEntityFeature.TURN_OFF
-        | FanEntityFeature.SET_SPEED  # Backwards-compatible
+        | FanEntityFeature.SET_SPEED
     )
 
     def __init__(self, device, entry: ConfigEntry) -> None:
@@ -41,7 +41,9 @@ class OpenFan(CoordinatorEntity, FanEntity):
         self._host = getattr(device, "host", "unknown")
         self._attr_name = getattr(device, "name", "OpenFAN Micro")
         self._attr_unique_id = f"openfan_micro_fan_{self._host}"
-        self._last_speed: int | None = None  # Remember last speed
+
+        # Store last speed (percentage)
+        self._last_speed: int | None = None
 
     @property
     def device_info(self) -> dict[str, Any] | None:
@@ -70,8 +72,8 @@ class OpenFan(CoordinatorEntity, FanEntity):
     async def async_set_percentage(self, percentage: int, **kwargs) -> None:
         """Set fan PWM and request fast poll."""
         opts = self._entry.options or {}
-        min_pwm = int(opts.get("min_pwm", 0))
-        if int(percentage) > 0:
+        min_pwm = int(opts.get("min_pwm", 0)) or 1
+        if percentage > 0:
             percentage = max(min_pwm, int(percentage))
 
         try:
@@ -79,9 +81,8 @@ class OpenFan(CoordinatorEntity, FanEntity):
             _LOGGER.debug(
                 "OpenFAN Micro: PWM set to %s%% for host %s", percentage, self._host
             )
-            # Remember last speed when above 0%
-            if percentage > 0:
-                self._last_speed = percentage
+            # Save last speed
+            self._last_speed = percentage
         except Exception as exc:
             _LOGGER.error("OpenFAN Micro: Failed to set PWM: %s", exc)
             raise
@@ -90,25 +91,27 @@ class OpenFan(CoordinatorEntity, FanEntity):
         if hasattr(self.coordinator, "force_fast_poll"):
             self.coordinator.force_fast_poll()
 
-    async def async_turn_on(self, percentage: int | None = None, **kwargs) -> None:
-        """Turn fan on. If no percentage is provided, use last speed or min_pwm."""
+    async def async_turn_on(
+        self,
+        percentage: int | None = None,
+        preset_mode: str | None = None,
+        **kwargs,
+    ) -> None:
+        """Turn fan on at specified percentage or last remembered speed."""
         opts = self._entry.options or {}
         min_pwm = int(opts.get("min_pwm", 0)) or 1
+
         if percentage is None:
             # Use last speed if available, otherwise min_pwm
             percentage = self._last_speed or min_pwm
+
         await self.async_set_percentage(int(percentage))
 
     async def async_turn_off(self, **kwargs) -> None:
-        """Turn fan off (0% PWM)."""
-        try:
-            await self._device.api.set_pwm(0)
-            # Keep _last_speed so turning on resumes previous speed
-            if hasattr(self.coordinator, "force_fast_poll"):
-                self.coordinator.force_fast_poll()
-        except Exception as exc:
-            _LOGGER.error("OpenFAN Micro: Failed to turn off fan: %s", exc)
-            raise
+        """Turn fan off."""
+        await self._device.api.set_pwm(0)
+        if hasattr(self.coordinator, "force_fast_poll"):
+            self.coordinator.force_fast_poll()
 
     # ---- attributes ----
 
@@ -128,6 +131,7 @@ class OpenFan(CoordinatorEntity, FanEntity):
             "temp_update_min_interval": int(
                 ctrl.get("temp_update_min_interval", opts.get("temp_update_min_interval", 10))
             ),
-            "temp_deadband_pct": int(ctrl.get("temp_deadband_pct", opts.get("temp_deadband_pct", 3))),
-            "last_speed": self._last_speed,
+            "temp_deadband_pct": int(
+                ctrl.get("temp_deadband_pct", opts.get("temp_deadband_pct", 3))
+            ),
         }
