@@ -206,6 +206,25 @@ type: tile
 entity: fan.openfan_micro
 features:
   - type: fan-speed
+```
+
+Example: Slider Card
+```yaml
+type: entities
+entities:
+  - entity: fan.openfan_micro
+    name: Fan-Name
+```
+
+Example: Horizontal Fan Control
+```yaml
+type: horizontal-stack
+cards:
+  - type: tile
+    entity: fan.openfan_micro
+    features:
+      - type: fan-speed
+```
 
 ---
 
