@@ -65,7 +65,7 @@ action: openfan_micro.set_temp_control
 data:
   entity_id: fan.your_fan
   temp_entity: sensor.temperature
-  temp_curve: "30=40, 40=60, 55=100"
+  temp_curve: "30=40, 40=50, 55=100"
 ```
 The temperature curve can be adjusted as requiured, based on above example:
 (Temp=FanSpeed)
