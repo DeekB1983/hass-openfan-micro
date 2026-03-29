@@ -38,7 +38,7 @@ Custom integration for **OpenFAN Micro** devices, providing fan control, monitor
 ## 🔧 First Run: Calibrate Minimum PWM
 Run once per device to find the minimum PWM that your fan can reliably spin at.  
 When executed this will sweep the PWM values for your fan and detect minimum value that your fan can reliably spin at.  
-Once Complete it stores result in options as min_pwm and marks the fan as calibrated.  
+Once complete it stores the result in options as min_pwm and marks the fan as calibrated.  
 This can be achieved by going to "Developer Tools → Actions → openfan_micro.calibrate_min"
 
 Run:
