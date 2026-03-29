@@ -1,4 +1,4 @@
-"""Fan entity for OpenFAN Micro with min-PWM clamp, last speed memory, and fast-polling."""
+"""Fan entity for OpenFAN Micro with last-speed memory, min-PWM clamp, fast-polling, and debug attributes."""
 from __future__ import annotations
 from typing import Any
 import logging
@@ -26,7 +26,7 @@ async def async_setup_entry(
 
 
 class OpenFan(CoordinatorEntity, FanEntity):
-    """Fan entity for OpenFAN Micro."""
+    """Fan entity for OpenFAN Micro with last-speed memory."""
 
     _attr_supported_features = (
         FanEntityFeature.TURN_ON
@@ -42,8 +42,10 @@ class OpenFan(CoordinatorEntity, FanEntity):
         self._attr_name = getattr(device, "name", "OpenFAN Micro")
         self._attr_unique_id = f"openfan_micro_fan_{self._host}"
 
-        # Store last speed (percentage)
+        # Memory of last fan speed (percentage)
         self._last_speed: int | None = None
+
+    # ---- device info ----
 
     @property
     def device_info(self) -> dict[str, Any] | None:
@@ -81,8 +83,11 @@ class OpenFan(CoordinatorEntity, FanEntity):
             _LOGGER.debug(
                 "OpenFAN Micro: PWM set to %s%% for host %s", percentage, self._host
             )
-            # Save last speed
+            # Remember last speed in memory
             self._last_speed = percentage
+            # Also store in ctrl_state so it persists across reloads
+            if hasattr(self._device, "ctrl_state"):
+                self._device.ctrl_state["last_speed"] = percentage
         except Exception as exc:
             _LOGGER.error("OpenFAN Micro: Failed to set PWM: %s", exc)
             raise
@@ -102,14 +107,20 @@ class OpenFan(CoordinatorEntity, FanEntity):
         min_pwm = int(opts.get("min_pwm", 0)) or 1
 
         if percentage is None:
-            # Use last speed if available, otherwise min_pwm
-            percentage = self._last_speed or min_pwm
+            # Use last speed in memory, or from ctrl_state, otherwise min_pwm
+            percentage = self._last_speed or getattr(self._device, "ctrl_state", {}).get("last_speed") or min_pwm
 
         await self.async_set_percentage(int(percentage))
 
     async def async_turn_off(self, **kwargs) -> None:
-        """Turn fan off."""
-        await self._device.api.set_pwm(0)
+        """Turn the fan off."""
+        try:
+            await self._device.api.set_pwm(0)
+            # Store 0 as last_speed temporarily? Keep memory intact
+        except Exception as exc:
+            _LOGGER.error("OpenFAN Micro: Failed to turn off fan: %s", exc)
+            raise
+
         if hasattr(self.coordinator, "force_fast_poll"):
             self.coordinator.force_fast_poll()
 
@@ -128,10 +139,9 @@ class OpenFan(CoordinatorEntity, FanEntity):
             "temp_avg": ctrl.get("temp_avg"),
             "last_target_pwm": ctrl.get("last_target_pwm"),
             "last_applied_pwm": ctrl.get("last_applied_pwm"),
+            "last_speed": self._last_speed or ctrl.get("last_speed"),
             "temp_update_min_interval": int(
                 ctrl.get("temp_update_min_interval", opts.get("temp_update_min_interval", 10))
             ),
-            "temp_deadband_pct": int(
-                ctrl.get("temp_deadband_pct", opts.get("temp_deadband_pct", 3))
-            ),
+            "temp_deadband_pct": int(ctrl.get("temp_deadband_pct", opts.get("temp_deadband_pct", 3))),
         }
