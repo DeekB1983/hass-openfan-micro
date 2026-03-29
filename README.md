@@ -52,8 +52,10 @@ data:
   rpm_threshold: 120
   margin: 5
 ```
----
+Example Screenshot:
+![brave_1nEliYdmD0](https://github.com/user-attachments/assets/21bc5667-e7a7-4d33-9e5a-68c8df16627b)
 
+---
 ## 🌡️ Temperature Control
 
 The temperature control for the fan is software based and can be achieved by going to:  "Developer Tools → Actions → openfan_micro.set_temp_control"
