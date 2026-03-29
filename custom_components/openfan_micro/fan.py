@@ -24,11 +24,12 @@ async def async_setup_entry(
         return
     async_add([OpenFan(device, entry)])
 
+
 class OpenFan(CoordinatorEntity, FanEntity):
     """Fan entity for OpenFAN Micro."""
 
     _attr_supported_features = (
-        FanEntityFeature.SET_SPEED
+        FanEntityFeature.SET_PERCENTAGE
         | FanEntityFeature.TURN_ON
         | FanEntityFeature.TURN_OFF
     )
@@ -40,6 +41,8 @@ class OpenFan(CoordinatorEntity, FanEntity):
         self._host = getattr(device, "host", "unknown")
         self._attr_name = getattr(device, "name", "OpenFAN Micro")
         self._attr_unique_id = f"openfan_micro_fan_{self._host}"
+
+    # ---- properties ----
 
     @property
     def device_info(self) -> dict[str, Any] | None:
@@ -61,28 +64,62 @@ class OpenFan(CoordinatorEntity, FanEntity):
         p = self.percentage
         return None if p is None else (p > 0)
 
+    # ---- control methods ----
+
     async def async_set_percentage(self, percentage: int, **kwargs) -> None:
-        opts = self._entry.options or {}
-        min_pwm = int(opts.get("min_pwm", 0))
+        """Set fan PWM and request fast poll immediately."""
+        min_pwm = int(self._entry.options.get("min_pwm", 0))
         if percentage > 0:
             percentage = max(min_pwm, percentage)
+
         try:
             await self._device.api.set_pwm(percentage)
-            _LOGGER.debug("OpenFAN Micro: PWM set to %s%% for host %s", percentage, self._host)
+            _LOGGER.debug(
+                "OpenFAN Micro: PWM set to %s%% for host %s", percentage, self._host
+            )
         except Exception as exc:
             _LOGGER.error("OpenFAN Micro: Failed to set PWM: %s", exc)
             raise
 
-        # request fast poll
+        # Request fast poll to immediately update HA
         if hasattr(self.coordinator, "force_fast_poll"):
             self.coordinator.force_fast_poll()
 
-    async def async_turn_on(self, percentage: int | None = None, **kwargs) -> None:
+    async def async_turn_on(
+        self,
+        percentage: int | None = None,
+        preset_mode: str | None = None,
+        **kwargs,
+    ) -> None:
+        """Turn the fan on."""
         if percentage is None:
+            # Ensure at least min PWM
             percentage = max(1, self._entry.options.get("min_pwm", 0) or 1)
-        await self.async_set_percentage(percentage)
+        await self.async_set_percentage(int(percentage))
 
     async def async_turn_off(self, **kwargs) -> None:
-        await self._device.api.set_pwm(0)
-        if hasattr(self.coordinator, "force_fast_poll"):
-            self.coordinator.force_fast_poll()
+        """Turn the fan off."""
+        await self.async_set_percentage(0)
+
+    # ---- extra state attributes ----
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        opts = self._entry.options or {}
+        ctrl = getattr(self._device, "ctrl_state", {}) or {}
+        return {
+            "min_pwm": int(opts.get("min_pwm", 0)),
+            "min_pwm_calibrated": bool(opts.get("min_pwm_calibrated", False)),
+            "temp_control_active": bool(ctrl.get("active", False)),
+            "temp_entity": ctrl.get("temp_entity") or opts.get("temp_entity", ""),
+            "temp_curve": ctrl.get("temp_curve") or opts.get("temp_curve", ""),
+            "temp_avg": ctrl.get("temp_avg"),
+            "last_target_pwm": ctrl.get("last_target_pwm"),
+            "last_applied_pwm": ctrl.get("last_applied_pwm"),
+            "temp_update_min_interval": int(
+                ctrl.get("temp_update_min_interval", opts.get("temp_update_min_interval", 10))
+            ),
+            "temp_deadband_pct": int(
+                ctrl.get("temp_deadband_pct", opts.get("temp_deadband_pct", 3))
+            ),
+        }
