@@ -56,7 +56,8 @@ Example Screenshot:
 ---
 ## 🌡️ Temperature Control
 
-The temperature control for the fan is software based and can be achieved by going to:  "Developer Tools → Actions → openfan_micro.set_temp_control"
+The temperature control for the fan is software based and can be achieved by going to:  
+"Developer Tools → Actions → openfan_micro.set_temp_control"
 
 Enable:
 ```yaml
