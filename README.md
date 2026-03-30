@@ -54,105 +54,40 @@ Example Screenshot:
 ![brave_1nEliYdmD0](https://github.com/user-attachments/assets/21bc5667-e7a7-4d33-9e5a-68c8df16627b)
 
 ---
-## 🌡️ Temperature Control
-
-The temperature control for the fan is software based and can be achieved by going to:  
-"Developer Tools → Actions → openfan_micro.set_temp_control"
-
-Enable:
-```yaml
-action: openfan_micro.set_temp_control
-data:
-  entity_id: fan.your_fan
-  temp_entity: sensor.temperature
-  temp_curve: "30=40, 40=50, 55=100"
-```
-The temperature curve can be adjusted as requiured, based on above example:
-(Temp=FanSpeed)
- * 30 degrees celcius = 40% PWM Value
- * 40 degrees celcius = 50% PWM Value
- * 55 degrees celcius = 100% PWM Value
-   
-Example Screenshot:
- ![brave_gDeR4aVy42](https://github.com/user-attachments/assets/40420226-fd37-4e71-bc7b-11ee2b961b6c)
-
-Disable:
-```yaml
-action: openfan_micro.clear_temp_control
-```
----
-## 🚀 Current Status
-**Version:** v1.0.4 (Stable Release)
-**Home Assistant:** 2026.03.+ compatible (Earlier versions may work but all testing has been completed on 2026.03.+)
-
-This release focuses on:
-* Device stability
-* Reduced API load
-* Reliable real-time control
-
----
-## ⚠️ Background (Why these changes were made)
-
-> ⚠️ Note: This integration has been significantly optimised to prevent device instability caused by excessive API polling.
-
-Earlier versions of this integration used **aggressive polling (~5s constantly)** which resulted in:
-
-* OpenFAN Micro web UI becoming unresponsive
-* Device dropping off the network
-* High API load (~32,000+ requests/day)
-* Required manual reboot to recover
-* Potential port exhuastion
-* Potential memory exhuastion
-
-### Root cause:
-> Excessive API calls and inefficient HTTP connection handling overwhelmed the microcontroller.
-
----
-## 📉 Key Improvement: Smart Polling
-
-### Before:
-* Polling every 5 seconds continuously
-* Multiple endpoints per cycle
-* ~32,000+ API calls/day
-
-### After:
-* Default polling: **60 seconds**
-* Fast polling: **2 seconds (only after user interaction)**
-* Secondary data polled less frequently
-* * ~1,650 API calls/day (idle)
-* ~1,750–2,000 API calls/day (typical use if manually adjusting the fan via Home Assistant)
-
-### Result:
-✅ ~93.75%+ reduction in API load  
-✅ Device remains stable long-term  
-✅ Web UI stays responsive  
-
----
 ## ⚡ Features
 
 ### Core
 * Fan control (0–100%)
 * RPM sensor (`sensor.<name>_rpm`)
 * Fan on/off control
-* Fast response after changes (~0–5s)
+* Fast response after changes (~0–5s) - This behaviour changes in v1.0.3, See smart polling section below.
 
 ### Device Controls
 * LED switch (`switch.<name>_led`)
 * 12V / 5V mode switch (`switch.<name>_12v_mode`)
 
 ### Reliability
-* Availability gating (failure threshold)
+* Availability gating (failure threshold, 3 consecutive failures)
 * Stall detection:
   * Binary sensor
   * Home Assistant event
   * Persistent notification
 
-### Advanced Control
+### Advanced Temperature Control
 * Temperature-based fan control:
   * Piecewise curve (°C → PWM)
   * Moving average smoothing
   * Deadband to prevent oscillation
   * Minimum PWM enforcement (via calibration)
+ 
+### Entities
+Per device:
+
+* `fan.<name>`
+* `sensor.<name>_rpm`
+* `switch.<name>_led`
+* `switch.<name>_12v_mode`
+* `binary_sensor.<name>_stall`
 
 ### Diagnostics
 * Built-in diagnostics export
@@ -183,56 +118,37 @@ Your OpenFAN Micro firmware must support:
 Tested on OpenFAN Micro Firmware: v20240319
 
 ---
-## 🧠 Smart Polling Behaviour
+## 🌡️ Temperature Control
 
-| Scenario          | Poll Interval                 |
-| ----------------- | ----------------------------- |
-| Idle              | 60 seconds                    |
-| After HA control  | 2 seconds (≈6 seconds total) |
-| LED / 12V refresh | Every ~6 minutes              |
+The temperature control for the fan is software based and can be achieved by going to:  
+"Developer Tools → Actions → openfan_micro.set_temp_control"
 
-### Behaviour:
+Enable:
+```yaml
+action: openfan_micro.set_temp_control
+data:
+  entity_id: fan.your_fan
+  temp_entity: sensor.temperature
+  temp_curve: "30=40, 40=50, 55=100"
+```
+The temperature curve can be adjusted as requiured, based on above example:
+(Temp=FanSpeed)
+ * 30 degrees celcius = 40% PWM Value
+ * 40 degrees celcius = 50% PWM Value
+ * 55 degrees celcius = 100% PWM Value
+   
+Example Screenshot:
+ ![brave_gDeR4aVy42](https://github.com/user-attachments/assets/40420226-fd37-4e71-bc7b-11ee2b961b6c)
 
-1. User changes fan speed via the Home Assistant Integration
-2. Immediate refresh triggered via Fast Polling
-3. Fast polling (2s × 3 cycles)
-4. Automatically returns to 60s polling after 3 fast polling cycles if no more PWM fan changes via HA are completed
-5. Polling stays at 60 seconds if fan speed is changed via the MicroFan controller Web interface (Expected)
+To disable temperature based fan control run the following:
+"Developer Tools → Actions → openfan_micro.clear_temp_control"
 
----
-## ⚙️🌀 Fan Behavior: Before vs After (V1.0.4)
-
-| Feature | Before | After |
-|---------|--------|-------|
-| **Positional Argument Bug** | `async_turn_on()` failed with “takes 1 to 2 positional arguments but 3 were given” | Fixed method signature to match Home Assistant expectations |
-| **Power On Speed** | Fan always started at 1% when turned on | Fan starts at **last user-set speed**, or **50% by default** if first time |
-| **Turning Off** | Speed reset to 1% | Speed **retained**; next turn-on resumes last speed |
-| **Home Assistant Slider** | Moving slider after off/on reset to 1% | Slider reflects **current or last speed**, consistent after off/on |
-| **Automations** | Automations turning fan on had to explicitly set speed | Automations can turn fan on **without specifying speed**; last speed used automatically |
-| **Debug / Attributes** | Limited visibility of last PWM | `last_speed` added to `extra_state_attributes` for easier monitoring |
-| **User Experience** | Inconsistent, fan always “starts slow” | Smooth, predictable fan behavior ⚡🌀 |
-
-> ⚠️ Note: The default startup speed of 50% applies only on the **first power-on**. After that, the fan remembers the last user-set speed automatically.
-
----
-## 🌐 HTTP Optimisations (v1.0.3)
-To prevent device overload:
-
-* Disabled HTTP keep-alive
-* Added delay between API requests
-* Reduced duplicate calls
-* Centralised polling via coordinator
-* Split high-frequency vs low-frequency data
-
----
-## 🔌 Entities
-Per device:
-
-* `fan.<name>`
-* `sensor.<name>_rpm`
-* `switch.<name>_led`
-* `switch.<name>_12v_mode`
-* `binary_sensor.<name>_stall`
+Disable:
+```yaml
+action: openfan_micro.clear_temp_control
+```
+Example Screenshot:
+<img width="1632" height="344" alt="image" src="https://github.com/user-attachments/assets/dece2f6c-078f-414b-8f9a-58ac060c1bc6" />
 
 ---
 # 🏠🌀 Lovelace Usage 
@@ -300,9 +216,97 @@ logger:
   logs:
     custom_components.openfan_micro: debug
 ```
+---
+## 🚀 Current Status
+**Version:** v1.0.4 (Stable Release)
+**Home Assistant:** 2026.03.+ compatible (Earlier versions may work but all testing has been completed on 2026.03.+)
+
+This release focuses on:
+* Device stability
+* Reduced API load
+* Reliable real-time control of Fans
 
 ---
-## 🔗 Device Web Interface
+#### Change Log
+## ⚠️ Background (Why these changes were made)
+---
+## ⚙️🌀 Fan Behavior: Before vs After (V1.0.4)
+
+| Feature | Before | After |
+|---------|--------|-------|
+| **Positional Argument Bug** | `async_turn_on()` failed with “takes 1 to 2 positional arguments but 3 were given” | Fixed method signature to match Home Assistant expectations |
+| **Power On Speed** | Fan always started at 1% when turned on | Fan starts at **last user-set speed**, or **50% by default** if first time |
+| **Turning Off** | Speed reset to 1% | Speed **retained**; next turn-on resumes last speed |
+| **Home Assistant Slider** | Moving slider after off/on reset to 1% | Slider reflects **current or last speed**, consistent after off/on |
+| **Automations** | Automations turning fan on had to explicitly set speed | Automations can turn fan on **without specifying speed**; last speed used automatically |
+| **Debug / Attributes** | Limited visibility of last PWM | `last_speed` added to `extra_state_attributes` for easier monitoring |
+| **User Experience** | Inconsistent, fan always “starts slow” | Smooth, predictable fan behavior ⚡🌀 |
+
+> ⚠️ Note: The default startup speed of 50% applies only on the **first power-on**. After that, the fan remembers the last user-set speed automatically.
+---
+Earlier versions of this integration used **aggressive polling (~5s constantly)** which resulted in:
+
+* OpenFAN Micro web UI becoming unresponsive
+* Device dropping off the network
+* High API load (~32,000+ requests/day)
+* Required manual reboot to recover
+* Potential port exhuastion
+* Potential memory exhuastion
+
+### Root cause:
+> Excessive API calls and inefficient HTTP connection handling overwhelmed the microcontroller.
+
+---
+## 📉 Key Improvement: Smart Polling (v1.0.3)
+
+### Before:
+* Polling every 5 seconds continuously
+* Multiple endpoints per cycle
+* ~32,000+ API calls/day
+
+### After:
+* Default polling: **60 seconds**
+* Fast polling: **2 seconds (only after user interaction)**
+* Secondary data polled less frequently
+* ~1,650 API calls/day (idle)
+* ~1,750–2,000 API calls/day (typical use if manually adjusting the fan via Home Assistant)
+
+### Result:
+✅ ~93.75%+ reduction in API load  
+✅ Device remains stable long-term  
+✅ Web UI stays responsive  
+
+---
+## 🧠 Smart Polling Behaviour (v1.0.3)
+
+| Scenario          | Poll Interval                 |
+| ----------------- | ----------------------------- |
+| Idle              | 60 seconds                    |
+| After HA control  | 2 seconds (≈6 seconds total) |
+| LED / 12V refresh | Every ~6 minutes              |
+
+### Behaviour:
+
+1. User changes fan speed via the Home Assistant Integration
+2. Immediate refresh triggered via Fast Polling
+3. Fast polling (2s × 3 cycles)
+4. Automatically returns to 60s polling after 3 fast polling cycles if no more PWM fan changes via HA are completed
+5. Polling stays at 60 seconds if fan speed is changed via the MicroFan controller Web interface (Expected)
+
+> ⚠️ Note: This integration has been significantly optimised to prevent device instability caused by excessive API polling.
+
+---
+## 🌐 HTTP Optimisations (v1.0.3)
+To prevent device overload:
+
+* Disabled HTTP keep-alive
+* Added delay between API requests
+* Reduced duplicate calls
+* Centralised polling via coordinator
+* Split high-frequency vs low-frequency data
+
+---
+## 🔗 Device Web Interface (v1.0.3)
 A **“Visit Device”** button is available in Home Assistant, linking directly to the device’s web UI.
 
 ---
@@ -336,6 +340,7 @@ Please include:
   * Stability improvements
   * Smart polling system
   * API optimisation
+  * Reliable real-time control of Fans
   * Enhanced diagnostics
 
 ---
