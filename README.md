@@ -290,7 +290,7 @@ Earlier versions of this integration used **aggressive polling (~5s constantly)*
 * Potential memory exhuastion
 
 ### Root cause:
-> Excessive API calls and inefficient HTTP connection handling overwhelmed the microcontroller.
+> Excessive API calls and inefficient HTTP connection handling overwhelmed the microcontroller.   
 > ⚠️ Note: This integration has been significantly optimised to prevent device instability caused by excessive API polling.
 
 ---
