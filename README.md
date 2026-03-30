@@ -242,18 +242,6 @@ This release focuses on:
 | **User Experience** | Inconsistent, fan always “starts slow” | Smooth, predictable fan behavior ⚡🌀 |
 
 > ⚠️ Note: The default startup speed of 50% applies only on the **first power-on**. After that, the fan remembers the last user-set speed automatically.
----
-Earlier versions of this integration used **aggressive polling (~5s constantly)** which resulted in:
-
-* OpenFAN Micro web UI becoming unresponsive
-* Device dropping off the network
-* High API load (~32,000+ requests/day)
-* Required manual reboot to recover
-* Potential port exhuastion
-* Potential memory exhuastion
-
-### Root cause:
-> Excessive API calls and inefficient HTTP connection handling overwhelmed the microcontroller.
 
 ---
 ## 📉 Key Improvement: Smart Polling (v1.0.3)
@@ -293,6 +281,19 @@ Earlier versions of this integration used **aggressive polling (~5s constantly)*
 5. Polling stays at 60 seconds if fan speed is changed via the MicroFan controller Web interface (Expected)
 
 > ⚠️ Note: This integration has been significantly optimised to prevent device instability caused by excessive API polling.
+
+Earlier versions of this integration used **aggressive polling (~5s constantly)** which resulted in:
+
+* OpenFAN Micro web UI becoming unresponsive
+* Device dropping off the network
+* High API load (~32,000+ requests/day)
+* Required manual reboot to recover
+* Potential port exhuastion
+* Potential memory exhuastion
+
+### Root cause:
+> Excessive API calls and inefficient HTTP connection handling overwhelmed the microcontroller.
+
 
 ---
 ## 🌐 HTTP Optimisations (v1.0.3)
