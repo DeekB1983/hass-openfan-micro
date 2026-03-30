@@ -60,7 +60,7 @@ Example Screenshot:
 * Fan control (0–100%)
 * RPM sensor (`sensor.<name>_rpm`)
 * Fan on/off control
-* Fast response after changes (~0–5s) - This behaviour changes in v1.0.3, See smart polling section below.
+* Fast response after changes (~0–5s) - This behaviour changes in v1.0.3, See smart polling section in ChangeLog.md.
 
 ### Device Controls
 * LED switch (`switch.<name>_led`)
