@@ -217,7 +217,7 @@ logger:
     custom_components.openfan_micro: debug
 ```
 ---
-## 🚀 Current Status
+## 🚀 Current Status - Change Log
 **Version:** v1.0.4 (Stable Release)
 **Home Assistant:** 2026.03.+ compatible (Earlier versions may work but all testing has been completed on 2026.03.+)
 
@@ -227,9 +227,8 @@ This release focuses on:
 * Reliable real-time control of Fans
 
 ---
-#### Change Log
 ## ⚠️ Background (Why these changes were made)
----
+
 ## ⚙️🌀 Fan Behavior: Before vs After (V1.0.4)
 
 | Feature | Before | After |
