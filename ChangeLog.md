@@ -1,7 +1,8 @@
 
 ## 🚀 Current Status - Change Log
-**Version:** v1.0.4 (Stable Release)
-**Home Assistant:** 2026.03.+ compatible (Earlier versions may work but all testing has been completed on 2026.03.+)
+**Version:** v1.0.4 (Stable Release)  
+**Home Assistant:** 2026.03.+ compatible  
+(Earlier versions may work but all testing has been completed on 2026.03.+)
 
 This release focuses on:
 * Device stability
