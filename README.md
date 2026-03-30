@@ -280,8 +280,6 @@ This release focuses on:
 4. Automatically returns to 60s polling after 3 fast polling cycles if no more PWM fan changes via HA are completed
 5. Polling stays at 60 seconds if fan speed is changed via the MicroFan controller Web interface (Expected)
 
-> ⚠️ Note: This integration has been significantly optimised to prevent device instability caused by excessive API polling.
-
 Earlier versions of this integration used **aggressive polling (~5s constantly)** which resulted in:
 
 * OpenFAN Micro web UI becoming unresponsive
@@ -293,7 +291,7 @@ Earlier versions of this integration used **aggressive polling (~5s constantly)*
 
 ### Root cause:
 > Excessive API calls and inefficient HTTP connection handling overwhelmed the microcontroller.
-
+> ⚠️ Note: This integration has been significantly optimised to prevent device instability caused by excessive API polling.
 
 ---
 ## 🌐 HTTP Optimisations (v1.0.3)
