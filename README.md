@@ -104,10 +104,10 @@ Data will be returned in json format, See Examples below:
   * Json
 ```json
 {
-    "status": "ok",
-    "data": {
-            "rpm": 1200,
-            "pwm_percent": 80
+   "status": "ok",
+   "data": {
+         "rpm": 1200,
+         "pwm_percent": 80
         }
 }
 ```
