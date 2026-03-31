@@ -101,16 +101,7 @@ Data will be returned in json format, See Examples below:
 
 ### Get RPM\PWM Values
 * `GET /api/v0/fan/status` Data Returned → `{ rpm, pwm_percent }`
-Json Repsonse:
-```json
-{
-   "status": "ok",
-   "data": {
-         "rpm": 1200,
-         "pwm_percent": 80
-        }
-}
-```
+  * `Json Repsonse` → `{"status":"ok","rpm":2160,"pwm_percent":52}`
 
 ### Set PWM Value
 * `POST /api/v0/fan/set?value=XX` Data Returned → `{ status, message }` 
