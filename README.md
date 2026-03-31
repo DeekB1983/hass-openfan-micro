@@ -96,13 +96,27 @@ Per device:
 ---
 ## 🌐 API Requirements
 
-Your OpenFAN Micro firmware must support:  
-### Required
-* `GET /api/v0/fan/status` Data Returned → `{ rpm, pwm_percent }`
+Your OpenFAN Micro firmware must support the following APi calls.  
+Data will be returned in json format, See Examples below:
+
+### Get RPM\PWM Values
+* `GET /api/v0/fan/status` Data Returned → `{ rpm, pwm_percent =  }`
+  * Json
+```json
+{
+    "status": "ok",
+    "data": {
+            "rpm": 1200,
+            "pwm_percent": 80
+        }
+}
+```
+
+### Set PWM Value
 * `POST /api/v0/fan/set?value=XX` Data Returned → `{ status, message }` 
 
-### Optional
-* `GET /api/v0/openfan/status`
+### Get LED State & Fan Voltage
+* `GET /api/v0/openfan/status` Data Returned → `{ act_led_enabled, fan_is_12v }` 
   * `act_led_enabled`
   * `fan_is_12v`
 
