@@ -98,8 +98,8 @@ Per device:
 
 Your OpenFAN Micro firmware must support:  
 ### Required
-* `GET /api/v0/fan/status` → `{ rpm, pwm_percent }`
-* `POST /api/v0/fan/set?value=XX` → `{ status, message }` 
+* `GET /api/v0/fan/status` Data Returned → `{ rpm, pwm_percent }`
+* `POST /api/v0/fan/set?value=XX` Data Returned → `{ status, message }` 
 
 ### Optional
 * `GET /api/v0/openfan/status`
