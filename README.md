@@ -100,8 +100,8 @@ Your OpenFAN Micro firmware must support the following APi calls.
 Data will be returned in json format, See Examples below:
 
 ### Get RPM\PWM Values
-* `GET /api/v0/fan/status` Data Returned → `{ rpm, pwm_percent =  }`
-  * Json
+* `GET /api/v0/fan/status` Data Returned → `{ rpm, pwm_percent }`
+Json Repsonse:
 ```json
 {
    "status": "ok",
