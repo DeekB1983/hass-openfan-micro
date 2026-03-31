@@ -97,28 +97,31 @@ Per device:
 ## 🌐 API Requirements
 
 Your OpenFAN Micro firmware must support the following APi calls.  
-Data will be returned in json format, See Examples below:
+Data will be returned as a json Object, See Examples below:
 
 ### Get RPM\PWM Values
-* GET `http://EndPoint/api/v0/fan/status` Data Returned → `{ rpm, pwm_percent }`
-  * Actual Json Repsonse → `{"status":"ok","rpm":2160,"pwm_percent":52}`
+* GET `http://EndPoint/api/v0/fan/status` Data Returned → `{ status, rpm, pwm_percent }`
+  * Real Json Repsonse → `{"status":"ok","rpm":2160,"pwm_percent":52}`
 
 ### Set PWM Value
-* `POST /api/v0/fan/set?value=XX` Data Returned → `{ status, message }` 
+* POST `http://EndPoint/api/v0/fan/set?value=XX` Data Returned → `{ status, message }`
+  * Real Json Response → `{"status":"ok", "message": "Setting PWM to 30" }`  
 
 ### Get LED State & Fan Voltage
-* `GET /api/v0/openfan/status` Data Returned → `{ act_led_enabled, fan_is_12v }` 
-  * `act_led_enabled`
-  * `fan_is_12v`
+* GET `http://EndPoint/api/v0/openfan/status` Data Returned → `{ act_led_enabled, fan_is_12v }` 
+  * Real Json Response → `{"status":"ok", "data": { "act_led_enabled": "false", "fan_is_12v": "false" }}`
 
-* LED:
-  * `/api/v0/led/enable`
-  * `/api/v0/led/disable`
+### Enable\Disable LED
+* POST `http://EndPoint/api/v0/led/enable` Data Returned → `{ status, message }`
+  * Real Json Response → `{"status":"ok", "message": "Activity LED enabled" }`
+* POST `http://EndPoint/api/v0/led/disable` Data Returned → `{ status, message }`
+  * Real Json Response → `{"status":"ok", "message": "Activity LED disabled" }`
 
-* Voltage:
-
-  * `/api/v0/fan/voltage/high` (for 12v)
-  * `/api/v0/fan/voltage/low` (for 5v)
+### Chnage Voltage Between 5v & 12v
+* POST `http://EndPoint/api/v0/fan/voltage/high?confirm=true` (for 12v) Data Returned → `{ status, message }`
+  * Real Json Response → `{ "status": "ok", "message": "Switching fan output to 12V" }`
+* POST `http://EndPoint/api/v0/fan/voltage/low?confirm=true` (for 5v) Data Returned → `{ status, message }`
+  * Real Json Response → `{ "status": "ok", "message": "Switching fan output to 5V" }`
   
 Tested on OpenFAN Micro Firmware: v20240319
 
