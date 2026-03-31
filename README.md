@@ -104,7 +104,7 @@ Data will be returned as a json Object, See Examples below:
   * Real Json Repsonse → `{"status":"ok","rpm":2160,"pwm_percent":52}`
 
 ### Set PWM Value
-* POST `http://EndPoint/api/v0/fan/set?value=XX` Data Returned → `{ status, message }`
+* POST `http://EndPoint/api/v0/fan/set?value=30` Data Returned → `{ status, message }`
   * Real Json Response → `{"status":"ok", "message": "Setting PWM to 30" }`  
 
 ### Get LED State & Fan Voltage
