@@ -139,8 +139,8 @@ data:
   temp_entity: sensor.temperature
   temp_curve: "30=40, 40=50, 55=100"
 ```
-The temperature curve can be adjusted as requiured, based on above example:
-(Temp=FanSpeed)
+The temperature curve can be adjusted as reqiured, based on above example:
+(Temp = FanSpeed)
  * 30 degrees celcius = 40% PWM Value
  * 40 degrees celcius = 50% PWM Value
  * 55 degrees celcius = 100% PWM Value
